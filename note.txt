@@ -1,0 +1,98 @@
+我在想有沒有辦法 我將此程式給不同人local使用. 
+然後若想要的話可以透過一個export的功能, 將選定的資料集合(可能是by category, or by tags) 可能有一個ui可以讓他選擇要export的scope. 然後 匯出成另一個target的 subset.db 也是sqlite格式的. 
+然後另一個人可以 透過另外的import功能讀取該subset.db 然後自由的匯入進他自己local的 sqlite database達到分享的目的. 
+
+你覺得這個概念如何?
+
+✨ 為什麼這是個好主意：
+✅ 不依賴雲端、保留 local autonomy
+每個人都可以有自己的獨立 local knowledge base
+
+不需要「一定上雲」，私密內容也能保有控制權
+
+✅ 支援可選範圍匯出（category / tags / notes）
+使用者可以只分享某一領域的知識（例如：「Linux Cmd 類別」）
+
+不會一股腦把所有東西 export，讓知識流通更精準
+
+✅ SQLite as exchange format：輕巧、通用
+匯出的 subset.db 還是 SQLite，簡單好用
+
+可以當作 exchange 中介層，或是備份格式
+
+✅ 可後續整合「Merge 策略」
+如果接收者本地已經有相同筆記，可以提示：
+
+🤔 要覆蓋？跳過？保留兩份？
+
+未來可以做「版本比對」「來源追蹤」「作者保留」
+
+
+概念流程（示意圖）：
+text
+複製
+編輯
+┌────────────┐
+│  User A    │
+│ (local.db) │
+└────┬───────┘
+     │ 選擇匯出 (by tags / category / search)
+     ▼
+┌──────────────────┐
+│  subset.db (可攜) │
+└────────┬─────────┘
+         │
+         ▼
+┌────────────┐
+│  User B    │
+│ (local.db) │
+└────┬───────┘
+     │  匯入選擇合併策略
+     ▼
+┌────────────────────────┐
+│  更新後的 local.db     │
+└────────────────────────┘
+
+
+🛠️ 技術設計建議
+1. Export UI
+顯示可選項目（分類 / tags / 關鍵字搜尋）
+
+多選支援
+
+Export as SQLite file → call API，後端產生 subset.db 並下載
+
+2. API – /api/export
+傳入條件（category, tag...）
+
+從原始 DB 抓符合條件的 notes / tags / categories
+
+建一個 memory SQLite（或用 tempfile），把這些 insert 進去
+
+回傳下載
+
+3. Import UI
+上傳 subset.db
+
+預覽：顯示其中有哪些筆記、幾個分類、幾個標籤
+
+選擇：全部導入 or 單筆導入 or 自訂策略
+
+4. 匯入策略（進階可做）
+若筆記 id 已存在，是否：
+
+覆蓋（直接 overwrite）
+
+跳過（保留舊筆記）
+
+並存（加上 [imported]）
+
+比對後再選擇
+
+
+✅ 可立即著手分工：
+功能	可開始做的項目
+Export	前端 UI + /api/export 建立 subset.db
+Import	上傳 UI + /api/import 解析 subset.db + 選擇匯入策略
+Schema 共通性	確保 notes, tags, categories schema 版本一致
+Merge 策略	先做簡單的，之後再進化成比對式

@@ -1,0 +1,36 @@
+<div class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+  <h1 class="text-2xl font-bold text-gray-800">🏷 Tags Overview</h1>
+
+  <!-- 排序 / 搜尋 -->
+  <div class="flex flex-col md:flex-row md:items-center gap-4">
+    <input type="text" id="tagSearchInput" placeholder="🔍 Filter tags..."
+      class="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm" />
+    <select id="tagSortSelect" class="w-full md:w-48 px-3 py-2 border border-gray-300 rounded-lg shadow-sm">
+      <option value="az">🔤 A → Z</option>
+      <option value="za">Z → A</option>
+      <option value="count">🔥 Most Used</option>
+    </select>
+  </div>
+
+  <!-- Tags + Chart Layout -->
+  <div class="flex flex-col lg:flex-row gap-8">
+    <!-- Tags -->
+    <div id="tagList" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 flex-1">
+      <!-- 動態生成 tag card -->
+    </div>
+
+    <!-- Chart -->
+    <div class="bg-white rounded-lg shadow-sm p-4 w-full lg:w-[300px] h-[280px]">
+      <canvas id="tagChart" class="w-full h-full"></canvas>
+    </div>
+  </div>
+
+  <!-- Notes by tag -->
+  <div id="tagNotesSection" class="hidden mt-6">
+    <h2 class="text-lg font-semibold text-gray-700 mb-2">📝 Notes with <span id="activeTag" class="text-blue-600"></span></h2>
+    <ul id="tagNoteList" class="space-y-4">
+      <!-- 動態生成筆記卡片 -->
+    </ul>
+  </div>
+</div>
+

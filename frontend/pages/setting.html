@@ -1,0 +1,44 @@
+<div class="max-w-3xl mx-auto px-4 py-6 space-y-6">
+  <h1 class="text-2xl font-bold text-gray-800">⚙️ Settings</h1>
+
+  <!-- 使用者偏好 -->
+  <div class="bg-white p-4 rounded-lg shadow-sm space-y-4">
+    <h2 class="text-lg font-semibold text-gray-700">🧑 User Preferences</h2>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-600">Default Category</label>
+      <select class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+        <option>Script</option>
+        <option>Server</option>
+        <option>DB</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-600">Default Tags</label>
+      <input type="text" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+             placeholder="e.g. linux, shell" />
+    </div>
+
+    <div class="flex items-center gap-2">
+      <input type="checkbox" id="autoSaveToggle" class="h-4 w-4 rounded border-gray-300" />
+      <label for="autoSaveToggle" class="text-sm text-gray-700">Enable auto save while editing</label>
+    </div>
+  </div>
+
+  <!-- 匯入 / 匯出 -->
+  <div class="bg-white p-4 rounded-lg shadow-sm space-y-2">
+    <h2 class="text-lg font-semibold text-gray-700">💾 Backup</h2>
+    <div class="flex gap-3">
+      <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">⬇️ Export Notes</button>
+      <button class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">⬆️ Import JSON</button>
+    </div>
+  </div>
+
+  <!-- 清理資料 -->
+  <div class="bg-white p-4 rounded-lg shadow-sm">
+    <h2 class="text-lg font-semibold text-gray-700 mb-2">🧹 Danger Zone</h2>
+    <button class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">🗑️ Clear All Notes</button>
+  </div>
+</div>

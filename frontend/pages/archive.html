@@ -1,0 +1,25 @@
+<div class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+  <h1 class="text-2xl font-bold text-gray-800">🗃 Archived Notes</h1>
+
+  <!-- 搜尋與分類 -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <input type="text" id="archiveSearch" placeholder="🔍 Search archived notes..."
+      class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm" />
+    <select id="archiveCategory" class="px-3 py-2 border border-gray-300 rounded-lg shadow-sm">
+      <option value="">All Categories</option>
+      <option>Server</option>
+      <option>Script</option>
+      <option>DB</option>
+    </select>
+    <select id="archiveSort" class="px-3 py-2 border border-gray-300 rounded-lg shadow-sm">
+      <option value="newest">📅 Newest</option>
+      <option value="oldest">Oldest</option>
+      <option value="az">A → Z</option>
+    </select>
+  </div>
+
+  <!-- Archived Notes -->
+  <div id="archiveList" class="space-y-4">
+    <!-- 動態插入卡片 -->
+  </div>
+</div>

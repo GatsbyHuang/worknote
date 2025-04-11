@@ -1,0 +1,47 @@
+from flask import Blueprint, jsonify, request
+from models.note_model import (
+    get_all_notes, get_note_by_id, create_note, delete_note,
+    update_note
+)
+
+notes_bp = Blueprint('notes_bp', __name__)
+
+@notes_bp.route('/', methods=['GET'])
+def get_notes():
+    limit = request.args.get('limit', type=int)
+    tag = request.args.get('tag')
+    category = request.args.get('category')
+    notes = get_all_notes(limit=limit, tag=tag, category=category)
+    return jsonify(notes)
+
+@notes_bp.route('/<note_id>', methods=['GET'])
+def get_note(note_id):
+    note = get_note_by_id(note_id)
+    return jsonify(note) if note else ('Not found', 404)
+
+@notes_bp.route('/', methods=['POST'])
+def add_note():
+    data = request.json
+    print(data)
+    
+    userid = data.get('userid')  # ✅ 取得使用者 ID
+    note_id = create_note(data, userid)  # ✅ 傳入 create_note
+
+    return jsonify({'id': note_id}), 201
+
+
+@notes_bp.route('/<note_id>', methods=['PUT'])
+def edit_note(note_id):
+    data = request.json
+    updated = update_note(note_id, data)
+    if updated:
+        return jsonify({'status': 'updated'})
+    else:
+        return ('Not found', 404)
+
+@notes_bp.route('/<note_id>', methods=['DELETE'])
+def delete_note_route(note_id):
+    delete_note(note_id)
+    return '', 204
+    
+    

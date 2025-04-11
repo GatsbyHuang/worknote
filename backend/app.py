@@ -1,0 +1,34 @@
+from flask import Flask, send_from_directory
+from flask_cors import CORS
+from db import init_db, DEFAULT_DB_PATH  # 直接引入 init_db 和預設路徑
+import os
+from routes.notes import notes_bp
+from routes.tags import tags_bp
+from routes.stats import stats_bp
+from routes.categories import categories_bp
+from routes.export import export_bp
+from routes.imports import import_bp
+app = Flask(__name__, static_folder='../frontend', static_url_path='/')
+CORS(app)
+
+if not DEFAULT_DB_PATH.exists():
+    init_db()
+
+# 註冊 API blueprint
+app.register_blueprint(notes_bp, url_prefix='/api/notes')
+app.register_blueprint(tags_bp, url_prefix='/api/tags')
+app.register_blueprint(stats_bp)
+app.register_blueprint(categories_bp)
+app.register_blueprint(export_bp)
+app.register_blueprint(import_bp)
+
+# 處理前端頁面（SPA）
+@app.route('/')
+@app.route('/<path:path>')
+def serve_frontend(path='index.html'):
+    return send_from_directory(app.static_folder, path)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
