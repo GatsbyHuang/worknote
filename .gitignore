@@ -1,0 +1,46 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.db
+
+# virtual environment
+.env/
+.venv/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# local env config
+*.env
+.env.*
+
+# === Flask-specific ===
+instance/
+*.sqlite3
+*.db
+
+# === Node / JS ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# === Frontend build cache (if any in future) ===
+dist/
+build/
+
+# === System ===
+.DS_Store
+Thumbs.db
+
+# === VSCode / JetBrains IDE ===
+.vscode/
+.idea/
+
+# === Backup or temp ===
+*.bak
+*.swp
+*.swo
