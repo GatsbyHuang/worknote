@@ -1,10 +1,11 @@
 from flask import Blueprint, jsonify, request
 from models.note_model import (
     get_all_notes, get_note_by_id, create_note, delete_note,
-    update_note
+    update_note,update_note_category
 )
 
 notes_bp = Blueprint('notes_bp', __name__)
+
 
 @notes_bp.route('/', methods=['GET'])
 def get_notes():
@@ -43,5 +44,14 @@ def edit_note(note_id):
 def delete_note_route(note_id):
     delete_note(note_id)
     return '', 204
-    
+
+@notes_bp.route('/<note_id>/category', methods=['PATCH'])
+def patch_category(note_id):
+    category = request.json.get('category')
+    if not category:
+        return jsonify({'error': 'Missing category'}), 400
+
+    ok = update_note_category(note_id, category)
+    return jsonify({'success': ok})
+
     

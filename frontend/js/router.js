@@ -1,22 +1,22 @@
 // js/router.js
 
-
 async function loadPage(path) {
-  const content = await fetch(`pages/${path}.html`).then(res => res.text());
+  const basePath = path.split('?')[0];  // 🔧 保留純檔名部分
+  const content = await fetch(`pages/${basePath}.html`).then(res => res.text());
   document.getElementById('main-content').innerHTML = content;
   window.history.pushState({}, '', `#${path}`);
 
   try {
-    const module = await import(`./pages/${path}.js`);
-    module.init?.(); // 每頁的 init()
+    const module = await import(`./pages/${basePath}.js`);
+    module.init?.(new URLSearchParams(path.split('?')[1] || '')); // ✅ 把 query 傳進去
   } catch (e) {
-    console.warn(`[router] 無 JS 模組對應：${path}`);
+    console.warn(`[router] 無 JS 模組對應：${basePath}`);
   }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  const defaultPage = location.hash?.slice(1) || 'dashboard';
-  loadPage(defaultPage);
+  const defaultPath = location.hash?.slice(1) || 'dashboard';
+  loadPage(defaultPath);
 
   document.querySelectorAll('[data-page]').forEach(btn => {
     btn.addEventListener('click', e => {

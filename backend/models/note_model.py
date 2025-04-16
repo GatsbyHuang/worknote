@@ -44,8 +44,8 @@ def get_note_by_id(note_id):
     return dict(note) if note else None
 
 def create_note(data, userid):
-    print("🧪 [DEBUG] 接收到 tags:", data.get('tags'))
-    print("🧪 [DEBUG] 寫入 tags（JSON 字串）:", json.dumps(data.get('tags')))
+    print("\U0001f9ea [DEBUG] 接收到 tags:", data.get('tags'))
+    print("\U0001f9ea [DEBUG] 寫入 tags（JSON 字串）:", json.dumps(data.get('tags')))
     conn = get_db()
     note_id = str(uuid.uuid4())
     with conn:
@@ -63,9 +63,25 @@ def update_note(note_id, data):
     with conn:
         result = conn.execute(
             "UPDATE notes SET title=?, content=?, tags=?, category=? WHERE id=?",
-            (data['title'], data['content'], json.dumps(data['tags']), data['category'], note_id)
+            (
+                data['title'],
+                data['content'],
+                json.dumps(data['tags']),
+                data['category'],
+                note_id
+            )
         )
         return result.rowcount > 0
+
+def update_note_category(note_id, category):
+    conn = get_db()
+    with conn:
+        result = conn.execute(
+            "UPDATE notes SET category=? WHERE id=?",
+            (category, note_id)
+        )
+        return result.rowcount > 0
+
 
 def delete_note(note_id):
     conn = get_db()
@@ -130,4 +146,3 @@ def query_notes_by_conditions(tags: List[str], categories: List[str], userids: L
     result = cursor.fetchall()
     conn.close()
     return result
-

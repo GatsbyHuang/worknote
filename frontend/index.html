@@ -23,39 +23,75 @@
 
   <!-- Desktop Top Bar -->
   <header class="hidden lg:flex justify-between items-center bg-white px-6 py-2 shadow-sm">
-    <div class="text-xl font-bold">🧠 DevNote</div>
     <div class="flex items-center gap-4">
-      <input id='globalSearchBtn' type="text" placeholder="Search..." class="px-3 py-1 border rounded-md w-64 bg-white border-gray-300 focus:ring-1 focus:ring-blue-400" />
+      <!-- Sidebar Toggle Button -->
+      <button id="sidebarToggleBtn" class="text-gray-500 hover:text-blue-500 transition">
+        <svg id="sidebarToggleIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M10 6h10M10 12h10M10 18h10M4 6h.01M4 12h.01M4 18h.01" />
+        </svg>
+      </button>
+      <div class="text-xl font-bold">🧠 DevNote</div>
+    </div>
+    <div class="flex items-center gap-4">
+      <input id='globalSearchBtn' type="text" placeholder="Search..."
+        class="px-3 py-1 border rounded-md w-64 bg-white border-gray-300 focus:ring-1 focus:ring-blue-400" />
       <div class="relative">
-        <img id="userAvatar" src="https://www.svgrepo.com/show/452030/avatar-default.svg" alt="User" class="w-8 h-8 rounded-full cursor-pointer border" />
+        <img id="userAvatar" src="https://www.svgrepo.com/show/452030/avatar-default.svg" alt="User"
+          class="w-8 h-8 rounded-full cursor-pointer border" />
         <div id="userIdLabel" class="absolute right-0 mt-1 text-xs text-right text-gray-500 hidden"></div>
       </div>
     </div>
   </header>
 
   <!-- Main Layout -->
-  <div class="flex flex-col lg:flex-row h-[calc(100vh-56px)]">
+  <div class="flex h-[calc(100vh-56px)]">
     <!-- Sidebar -->
-	<aside id="sidebar" class="hidden lg:block block w-full lg:w-64 bg-white shadow-sm p-4 overflow-y-auto">
-      <div class="text-sm text-gray-400 uppercase font-semibold tracking-wider">Menu</div>
-      <nav class="flex flex-col gap-2 text-sm text-gray-700">
-        <a href="#dashboard" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
-          <span>🏠</span><span>Dashboard</span>
+<aside id="sidebar"
+  class="w-64 bg-white shadow-sm p-4 overflow-y-auto transition-all duration-300 ease-in-out hidden lg:block">
+  <nav class="flex flex-col gap-2 text-sm text-gray-700 mt-2">
+
+    <!-- 常規項目 -->
+    <a href="#dashboard" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
+      <i data-lucide="home" class="w-4 h-4"></i><span>Dashboard</span>
+    </a>
+    <a href="#history" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
+      <i data-lucide="list" class="w-4 h-4"></i><span>All Notes</span>
+    </a>
+
+    <!-- Notes Tree 與 Notebook -->
+    <details open>
+      <summary class="cursor-pointer flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
+        <i data-lucide="tree-deciduous" class="w-4 h-4"></i><span>Notes Tree</span>
+      </summary>
+      <div class="ml-8 mt-2 flex flex-col gap-1">
+        <a href="#notetree?notebook=1"
+          class="text-sm flex items-center gap-2 px-2 py-1 rounded hover:bg-blue-50 transition text-blue-700"
+          data-notebook-id="1">
+          <i data-lucide="book" class="w-4 h-4 text-blue-600"></i><span>Cassandra</span>
         </a>
-        <a href="#history" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
-          <span>📋</span><span>All Notes</span>
+        <a href="#notetree?notebook=2"
+          class="text-sm flex items-center gap-2 px-2 py-1 rounded hover:bg-green-50 transition text-green-700"
+          data-notebook-id="2">
+          <i data-lucide="notebook" class="w-4 h-4 text-green-600"></i><span>Linux Tips</span>
         </a>
-        <a href="#export" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
-          <span>⬇️</span><span>Export</span>
-        </a>
-        <a href="#import" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
-          <span>⬆️</span><span>Import</span>
-        </a>
-      </nav>
-    </aside>
+      </div>
+    </details>
+
+    <!-- 匯入/匯出 -->
+    <a href="#export" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
+      <i data-lucide="upload" class="w-4 h-4"></i><span>Export</span>
+    </a>
+    <a href="#import" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
+      <i data-lucide="download" class="w-4 h-4"></i><span>Import</span>
+    </a>
+  </nav>
+</aside>
+
+
 
     <!-- Main Content -->
-    <main id="main-content" class="flex-1 p-6 overflow-y-auto bg-gray-50">
+    <main id="main-content" class="flex-1 p-6 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
       <div class="text-gray-400">Loading...</div>
     </main>
   </div>
@@ -111,6 +147,7 @@
 
   <script src="js/router.js"></script>
   <script src="js/pages/fuzzy-modal.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
 
   <!-- UI Script -->
   <script>
@@ -174,23 +211,50 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      updateUserUI();
+	 document.addEventListener('DOMContentLoaded', () => {
+		  updateUserUI();
+		  lucide.createIcons(); // 必須呼叫，才會將 <i data-lucide="..."> 替換成 SVG
 
-      document.getElementById('userAvatar')?.addEventListener('click', openLoginModal);
-      document.getElementById('loginCancel')?.addEventListener('click', closeLoginModal);
+		  document.getElementById('userAvatar')?.addEventListener('click', openLoginModal);
+		  document.getElementById('loginCancel')?.addEventListener('click', closeLoginModal);
+		  document.getElementById('loginConfirm')?.addEventListener('click', () => {
+			const val = document.getElementById('userIdInput').value.trim();
+			if (val) localStorage.setItem('userId', val);
+			else localStorage.removeItem('userId');
+			closeLoginModal();
+			updateUserUI();
+		  });
 
-      document.getElementById('loginConfirm')?.addEventListener('click', () => {
-        const val = document.getElementById('userIdInput').value.trim();
-        if (val) {
-          localStorage.setItem('userId', val);
-        } else {
-          localStorage.removeItem('userId');
-        }
-        closeLoginModal();
-        updateUserUI();
-      });
-    });
+		  // 🔧 折疊 sidebar
+		  const sidebar = document.getElementById('sidebar');
+		  const mainContent = document.getElementById('main-content');
+		  const icon = document.getElementById('sidebarToggleIcon');
+
+		  document.getElementById('sidebarToggleBtn')?.addEventListener('click', () => {
+			sidebar.classList.toggle('w-64');
+			sidebar.classList.toggle('w-0');
+			sidebar.classList.toggle('p-4');
+			sidebar.classList.toggle('overflow-y-auto');
+			sidebar.classList.toggle('hidden');
+
+			// 可加動畫效果或記錄狀態
+		  });
+		  
+		    const links = document.querySelectorAll('[data-notebook-id]');
+			const hash = window.location.hash;
+			const match = hash.match(/notebook=(\d+)/);
+			if (match) {
+			  const activeId = match[1];
+			  links.forEach(link => {
+				if (link.dataset.notebookId === activeId) {
+				  link.classList.add('bg-blue-100', 'font-semibold', 'rounded');
+				} else {
+				  link.classList.remove('bg-blue-100', 'font-semibold');
+				}
+			  });
+			}
+		  
+		});
   </script>
 </body>
 </html>

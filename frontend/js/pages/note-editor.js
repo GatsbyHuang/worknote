@@ -277,8 +277,8 @@ document.getElementById('deleteCategory')?.addEventListener('click', async () =>
 	  if (res.ok) {
 		alert('✅ Note saved successfully!');
 		sessionStorage.removeItem('currentNoteId');
-		window.location.hash = '#history';
-		window.dispatchEvent(new Event('popstate'));
+		//window.location.hash = '#history';
+		//window.dispatchEvent(new Event('popstate'));
 	  } else {
 		alert('❌ Failed to save the note.');
 	  }
