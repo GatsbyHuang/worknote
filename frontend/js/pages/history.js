@@ -59,30 +59,34 @@ export async function init() {
     });
   }
 
-  async function loadCategories() {
-    try {
-      const res = await fetch('/api/categories');
-      const categories = await res.json();
-      categoryFilter.innerHTML = '';
-      const allOpt = document.createElement('option');
-      allOpt.value = '';
-      allOpt.textContent = 'All Categories';
-      categoryFilter.appendChild(allOpt);
-      categories.forEach(cat => {
-        const opt = document.createElement('option');
-        opt.value = cat;
-        opt.textContent = cat;
-        categoryFilter.appendChild(opt);
-      });
+async function loadCategories() {
+  try {
+    const res = await fetch('/api/categories');
+    const categories = await res.json();
 
-      categoryFilter.addEventListener('change', () => {
-        if (categoryFilter.value === '') searchInput.value = '';
-        applyFilters();
-      });
-    } catch (err) {
-      console.error('❌ 無法載入分類：', err);
-    }
+    categoryFilter.innerHTML = '';
+
+    const allOpt = document.createElement('option');
+    allOpt.value = '';
+    allOpt.textContent = 'All Categories';
+    categoryFilter.appendChild(allOpt);
+
+    categories.forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat.id;           // ✅ category_id
+      opt.textContent = cat.name;   // ✅ 顯示名稱
+      categoryFilter.appendChild(opt);
+    });
+
+    categoryFilter.addEventListener('change', () => {
+      if (categoryFilter.value === '') searchInput.value = '';
+      applyFilters();
+    });
+  } catch (err) {
+    console.error('❌ 無法載入分類：', err);
   }
+}
+
 
   function formatRelativeTime(dateStr) {
     const now = new Date();

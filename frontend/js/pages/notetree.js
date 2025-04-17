@@ -1,42 +1,59 @@
 // notetree.js - for note-browser.html
 
-export async function init() {
-  console.log('🧭 Note Browser Page Loaded');
-  await loadSections();
-  initNoteBrowser();
-}
-// notetree.js - for note-browser.html
-
 let currentCategory = null;
+let currentNotebookId = null;
 let currentRightClickNoteId = null;
 let currentRightClickCategory = null;
 
-export async function initNoteBrowser() {
-  console.log('📂 Note Browser Init');
+export async function init() {
+  console.log('🧭 Note Browser Page Loaded');
+
+  // ✅ 從 URL 取得 notebook id
+  const params = new URLSearchParams(location.hash.split('?')[1] || '');
+  currentNotebookId = params.get('notebook');
+
   await loadCategories();
   setupContextMenu();
   setupButtonEvents();
 }
 
 function setupButtonEvents() {
-  document.getElementById('addSectionBtn')?.addEventListener('click', async () => {
-    const name = prompt('New category name?');
-    if (!name) return;
+  // --- Add Category ---
+	const sectionBtn = document.getElementById('addSectionBtn');
 
-    const res = await fetch('/api/categories', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name })
-    });
+	if (window.__addSectionHandler__) {
+	  sectionBtn?.removeEventListener('click', window.__addSectionHandler__);
+	}
+	const addSectionHandler = async () => {
+	  const name = prompt('New category name?');
+	  if (!name || !currentNotebookId) return;
 
-    if (res.ok) {
-      await loadCategories();
-    } else {
-      alert('❌ Failed to add category');
-    }
-  });
+	  const res = await fetch('/api/categories', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ name, notebook_id: currentNotebookId })
+	  });
 
-  document.getElementById('addNoteBtn')?.addEventListener('click', async () => {
+	  if (res.ok) {
+		await loadCategories();
+	  } else {
+		alert('❌ Failed to add category');
+	  }
+	};
+	sectionBtn?.addEventListener('click', addSectionHandler);
+	window.__addSectionHandler__ = addSectionHandler;
+
+  // --- Add Note ---
+  const addBtn = document.getElementById('addNoteBtn');
+
+  // 如果已綁定過，先解除
+  if (window.__addNoteHandler__) {
+    addBtn?.removeEventListener('click', window.__addNoteHandler__);
+  }
+
+  // 建立新的 handler 並綁定
+  const addNoteHandler = async () => {
+    console.log('[➕] Add Note');
     if (!currentCategory) {
       alert('⚠️ Please select a category first');
       return;
@@ -46,7 +63,7 @@ function setupButtonEvents() {
       title: 'Untitled',
       content: '',
       tags: [],
-      category: currentCategory,
+      category_id: currentCategory,
       created_at: new Date().toISOString(),
       userid: localStorage.getItem('userId')
     };
@@ -71,23 +88,28 @@ function setupButtonEvents() {
       const noteDetail = await fetchNoteDetail(newNoteId);
       await showEditor(noteDetail);
     }
-  });
+  };
+
+  addBtn?.addEventListener('click', addNoteHandler);
+  window.__addNoteHandler__ = addNoteHandler;
 }
 
+
 async function loadCategories() {
-  const res = await fetch('/api/categories');
+  if (!currentNotebookId) return;
+  const res = await fetch(`/api/categories?notebook_id=${currentNotebookId}`);
   const categories = await res.json();
   const sectionList = document.getElementById('sectionItems');
   sectionList.innerHTML = '';
 
-  categories.forEach(name => {
+  categories.forEach(cat => {
     const li = document.createElement('li');
-    li.textContent = name;
-    li.dataset.category = name;
+    li.textContent = cat.name;
+    li.dataset.category = cat.id;
     li.className = 'cursor-pointer hover:bg-blue-100 px-2 py-1 rounded';
     li.setAttribute('draggable', false);
 
-    li.addEventListener('click', () => selectSection(name));
+    li.addEventListener('click', () => selectSection(cat.id));
 
     li.addEventListener('dragover', e => {
       e.preventDefault();
@@ -103,12 +125,12 @@ async function loadCategories() {
       const res = await fetch(`/api/notes/${noteId}/category`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category: name })
+        body: JSON.stringify({ category_id: cat.id })
       });
 
       if (res.ok) {
-        console.log(`✅ Note ${noteId} moved to ${name}`);
-        selectSection(name);
+        console.log(`✅ Note ${noteId} moved to ${cat.name}`);
+        selectSection(cat.id);
       } else {
         alert('❌ Failed to move note');
       }
@@ -117,57 +139,14 @@ async function loadCategories() {
     sectionList.appendChild(li);
   });
 
-  if (categories[0]) selectSection(categories[0]);
+  if (categories[0]) selectSection(categories[0].id);
 }
 
-async function loadSections() {
-  const sections = await fetchCategories();
-  const container = document.getElementById('sectionItems');
-  container.innerHTML = '';
-
-  sections.forEach(name => {
-    const li = document.createElement('li');
-    li.textContent = name;
-    li.className = 'cursor-pointer hover:bg-blue-100 px-2 py-1 rounded';
-    li.dataset.category = name;
-    li.addEventListener('click', () => selectSection(name));
-
-    // 🟦 支援 Drop 拖拉筆記進來
-    li.addEventListener('dragover', e => e.preventDefault());
-    li.addEventListener('drop', async e => {
-      e.preventDefault();
-      const noteId = e.dataTransfer.getData('text/plain');
-      if (!noteId) return;
-
-
-	  const res = await fetch(`/api/notes/${noteId}/category`, {
-		method: 'PATCH',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ category: name })
-	  });
-      if (res.ok) {
-        console.log(`✅ Note ${noteId} moved to ${name}`);
-        selectSection(name); // refresh
-      } else {
-        alert('❌ Failed to move note');
-      }
-    });
-
-    container.appendChild(li);
-  });
-  
-  
-
-  if (sections[0]) selectSection(sections[0]);
-}
-
-
-
-function setActiveSection(name) {
-  currentCategory = name;
+function setActiveSection(categoryId) {
+  currentCategory = categoryId;
   const all = document.querySelectorAll('#sectionItems li');
   all.forEach(li => li.classList.remove('bg-blue-100', 'text-blue-700', 'font-semibold'));
-  const active = [...all].find(li => li.dataset.category === name);
+  const active = [...all].find(li => li.dataset.category === String(categoryId));
   if (active) active.classList.add('bg-blue-100', 'text-blue-700', 'font-semibold');
 }
 
@@ -178,11 +157,11 @@ function setActiveNote(noteId) {
   if (match) match.classList.add('bg-blue-100', 'text-blue-700', 'font-semibold', 'ring');
 }
 
-async function selectSection(category) {
-  currentCategory = category;
-  setActiveSection(category);
+async function selectSection(categoryId) {
+  currentCategory = categoryId;
+  setActiveSection(categoryId);
 
-  const notes = await fetchNotesByCategory(category);
+  const notes = await fetchNotesByCategory(categoryId);
   const noteList = document.getElementById('noteList');
   noteList.innerHTML = '';
 
@@ -215,6 +194,18 @@ async function selectSection(category) {
   });
 }
 
+export async function fetchNotesByCategory(categoryId) {
+  const res = await fetch(`/api/notes?category_id=${categoryId}`);
+  if (!res.ok) throw new Error('Failed to fetch notes');
+  return await res.json();
+}
+
+export async function fetchNoteDetail(id) {
+  const res = await fetch(`/api/notes/${id}`);
+  if (!res.ok) throw new Error('Failed to fetch note detail');
+  return await res.json();
+}
+
 function setupContextMenu() {
   const contextMenu = document.getElementById('contextMenu');
   const noteMenu = document.getElementById('noteMenu');
@@ -222,6 +213,7 @@ function setupContextMenu() {
   const deleteNoteOption = document.getElementById('deleteNoteOption');
   const deleteCategoryOption = document.getElementById('deleteCategoryOption');
 
+if (!window.__contextMenuSetupDone__) {
   document.addEventListener('contextmenu', e => {
     const noteEl = e.target.closest('[data-note-id]');
     const catEl = e.target.closest('[data-category]');
@@ -278,9 +270,10 @@ function setupContextMenu() {
   });
 
   deleteCategoryOption?.addEventListener('click', async () => {
+	
     if (!currentRightClickCategory) return;
 
-    const notesRes = await fetch(`/api/notes?category=${encodeURIComponent(currentRightClickCategory)}`);
+    const notesRes = await fetch(`/api/notes?category_id=${encodeURIComponent(currentRightClickCategory)}`);
     const notes = await notesRes.json();
 
     if (notes.length > 0) {
@@ -303,32 +296,29 @@ function setupContextMenu() {
       alert('❌ Failed to delete category.');
     }
   });
+	
+  window.__contextMenuSetupDone__ = true; // 🔒 記得只設一次
 }
+}
+
 
 async function showEditor(note) {
   sessionStorage.setItem('currentNoteId', note.id);
+
+  // 取得當前的 notebookId / categoryId，組裝 hash
+  const params = new URLSearchParams(location.hash.split('?')[1] || '');
+  const notebookId = params.get('notebook');
+  const categoryId = params.get('category') || note.category_id; // 若已有筆記分類，優先用它
+
+  // 修改 hash 為 note-editor 並加上 notebook/category
+  const newHash = `#note-editor?notebook=${notebookId || ''}&category=${categoryId || ''}`;
+  window.history.pushState({}, '', newHash);
+
+  // 載入內容
   const container = document.getElementById('noteDetail');
   const html = await fetch('/pages/note-editor.html').then(res => res.text());
   container.innerHTML = html;
 
   const module = await import('/js/pages/note-editor.js');
   await module.init();
-}
-
-export async function fetchCategories() {
-  const res = await fetch('/api/categories');
-  if (!res.ok) throw new Error('Failed to fetch categories');
-  return await res.json();
-}
-
-export async function fetchNotesByCategory(category) {
-  const res = await fetch(`/api/notes?category=${encodeURIComponent(category)}`);
-  if (!res.ok) throw new Error('Failed to fetch notes');
-  return await res.json();
-}
-
-export async function fetchNoteDetail(id) {
-  const res = await fetch(`/api/notes/${id}`);
-  if (!res.ok) throw new Error('Failed to fetch note detail');
-  return await res.json();
 }

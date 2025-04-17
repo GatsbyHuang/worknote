@@ -59,24 +59,16 @@
       <i data-lucide="list" class="w-4 h-4"></i><span>All Notes</span>
     </a>
 
-    <!-- Notes Tree 與 Notebook -->
-    <details open>
-      <summary class="cursor-pointer flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
-        <i data-lucide="tree-deciduous" class="w-4 h-4"></i><span>Notes Tree</span>
-      </summary>
-      <div class="ml-8 mt-2 flex flex-col gap-1">
-        <a href="#notetree?notebook=1"
-          class="text-sm flex items-center gap-2 px-2 py-1 rounded hover:bg-blue-50 transition text-blue-700"
-          data-notebook-id="1">
-          <i data-lucide="book" class="w-4 h-4 text-blue-600"></i><span>Cassandra</span>
-        </a>
-        <a href="#notetree?notebook=2"
-          class="text-sm flex items-center gap-2 px-2 py-1 rounded hover:bg-green-50 transition text-green-700"
-          data-notebook-id="2">
-          <i data-lucide="notebook" class="w-4 h-4 text-green-600"></i><span>Linux Tips</span>
-        </a>
-      </div>
-    </details>
+	<!-- Notes Tree 與 Notebook -->
+	<details open>
+	  <summary class="cursor-pointer flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
+		<i data-lucide="tree-deciduous" class="w-4 h-4"></i><span>Notes Tree</span>
+	  </summary>
+	  <div class="ml-8 mt-2 flex flex-col gap-1" data-notebook-list>
+		<!-- 🔄 Notebook list will be injected by JS -->
+	  </div>
+	</details>
+
 
     <!-- 匯入/匯出 -->
     <a href="#export" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
@@ -238,6 +230,29 @@
 			sidebar.classList.toggle('hidden');
 
 			// 可加動畫效果或記錄狀態
+		  });
+		  
+		  // 🔄 動態載入 Notebook 清單
+		fetch('/api/notebooks')
+		  .then(res => res.json())
+		  .then(notebooks => {
+			const container = document.querySelector('[data-notebook-list]');
+			container.innerHTML = ''; // 清空預設 demo notebook
+			notebooks.forEach(nb => {
+			  const a = document.createElement('a');
+			  a.href = `#notetree?notebook=${nb.id}`;
+			  a.className = 'text-sm flex items-center gap-2 px-2 py-1 rounded hover:bg-blue-50 transition text-blue-700';
+			  a.dataset.notebookId = nb.id;
+
+			  a.innerHTML = `
+				<i data-lucide="book" class="w-4 h-4 text-blue-600"></i>
+				<span>${nb.name}</span>
+			  `;
+
+			  container.appendChild(a);
+			});
+
+			lucide.createIcons(); // 更新 SVG icon
 		  });
 		  
 		    const links = document.querySelectorAll('[data-notebook-id]');

@@ -101,7 +101,7 @@ function formatRelativeTime(dateStr) {
 function renderTopCategories(notes) {
   const counts = {};
   notes.forEach(n => {
-    const cat = n.category?.trim();
+    const cat = n.category_name?.trim();
     if (cat) {
       counts[cat] = (counts[cat] || 0) + 1;
     }

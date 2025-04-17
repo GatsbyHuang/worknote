@@ -8,6 +8,7 @@ from routes.stats import stats_bp
 from routes.categories import categories_bp
 from routes.export import export_bp
 from routes.imports import import_bp
+from routes.notebook import notebooks_bp
 app = Flask(__name__, static_folder='../frontend', static_url_path='/')
 CORS(app)
 
@@ -18,9 +19,11 @@ if not DEFAULT_DB_PATH.exists():
 app.register_blueprint(notes_bp, url_prefix='/api/notes')
 app.register_blueprint(tags_bp, url_prefix='/api/tags')
 app.register_blueprint(stats_bp)
+app.register_blueprint(notebooks_bp)
 app.register_blueprint(categories_bp)
 app.register_blueprint(export_bp)
 app.register_blueprint(import_bp)
+
 
 # 處理前端頁面（SPA）
 @app.route('/')
