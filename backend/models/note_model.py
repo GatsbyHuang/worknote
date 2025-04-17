@@ -3,37 +3,43 @@ import json
 from db import get_db
 from typing import List
 
-def get_all_notes(limit=None, tag=None, category=None, userid=None):
+def get_all_notes(limit=None, tag=None, category_id=None, userid=None):
     conn = get_db()
     cur = conn.cursor()
 
-    query = "SELECT * FROM notes WHERE archived = 0"
+    query = """
+        SELECT n.*, c.name AS category_name
+        FROM notes n
+        LEFT JOIN categories c ON n.category_id = c.id
+        WHERE n.archived = 0
+    """
     params = []
 
-    if category:
-        query += " AND category = ?"
-        params.append(category)
+    if category_id:
+        query += " AND n.category_id = ?"
+        params.append(category_id)
 
     if userid:
-        query += " AND userid = ?"
+        query += " AND n.userid = ?"
         params.append(userid)
+
+    query += " ORDER BY n.created_at DESC"
+
+    if limit:
+        query += f" LIMIT {limit}"
 
     rows = cur.execute(query, params).fetchall()
     notes = []
 
     for row in rows:
         note = dict(row)
-        tags = json.loads(note.get('tags') or '[]')
+        note['tags'] = json.loads(note.get('tags') or '[]')
 
-        # filter tag
-        if tag and tag not in tags:
+        if tag and tag not in note['tags']:
             continue
 
-        note['tags'] = tags
-        notes.append(note)
 
-    if limit:
-        notes = notes[:limit]
+        notes.append(note)
 
     return notes
 
@@ -51,10 +57,10 @@ def create_note(data, userid):
     with conn:
         conn.execute(
             '''
-            INSERT INTO notes (id, title, content, tags, category, created_at, archived, userid)
+            INSERT INTO notes (id, title, content, tags, category_id, created_at, archived, userid)
             VALUES (?, ?, ?, ?, ?, ?, 0, ?)
             ''',
-            (note_id, data['title'], data['content'], json.dumps(data['tags']), data['category'], data['created_at'], userid)
+            (note_id, data['title'], data['content'], json.dumps(data['tags']), data['category_id'], data['created_at'], userid)
         )
     return note_id
 
@@ -62,26 +68,25 @@ def update_note(note_id, data):
     conn = get_db()
     with conn:
         result = conn.execute(
-            "UPDATE notes SET title=?, content=?, tags=?, category=? WHERE id=?",
+            "UPDATE notes SET title=?, content=?, tags=?, category_id=? WHERE id=?",
             (
                 data['title'],
                 data['content'],
                 json.dumps(data['tags']),
-                data['category'],
+                data['category_id'],
                 note_id
             )
         )
         return result.rowcount > 0
 
-def update_note_category(note_id, category):
+def update_note_category(note_id, category_id):
     conn = get_db()
     with conn:
         result = conn.execute(
-            "UPDATE notes SET category=? WHERE id=?",
-            (category, note_id)
+            "UPDATE notes SET category_id=? WHERE id=?",
+            (category_id, note_id)
         )
         return result.rowcount > 0
-
 
 def delete_note(note_id):
     conn = get_db()
@@ -107,38 +112,38 @@ def get_notes(limit=None, userid=None):
     rows = cur.execute(query, params).fetchall()
     return [dict(row) for row in rows]
 
-
-def query_notes_by_conditions(tags: List[str], categories: List[str], userids: List[str], mode: str, db_path=None):
+def query_notes_by_conditions(tags: List[str], category_ids: List[int], userids: List[str], mode: str, db_path=None):
     conn = get_db(db_path)
     cursor = conn.cursor()
 
     where_clauses = []
     values = []
 
-    # 模糊比對條件
     def build_clause(field, values_list):
         if not values_list:
-            return None
+            return None, []
         if mode == 'all':
             return ' AND '.join([f"{field} LIKE ?" for _ in values_list]), [f"%{v}%" for v in values_list]
-        else:  # 'any'
+        else:
             return ' OR '.join([f"{field} LIKE ?" for _ in values_list]), [f"%{v}%" for v in values_list]
 
     tag_clause, tag_vals = build_clause('tags', tags) if tags else (None, [])
-    cat_clause, cat_vals = build_clause('category', categories) if categories else (None, [])
     user_clause, user_vals = build_clause('userid', userids) if userids else (None, [])
+
+    if category_ids:
+        cat_clause = ' OR '.join(["category_id = ?" for _ in category_ids])
+        cat_vals = category_ids
+    else:
+        cat_clause, cat_vals = None, []
 
     for clause, vals in [(tag_clause, tag_vals), (cat_clause, cat_vals), (user_clause, user_vals)]:
         if clause:
             where_clauses.append(f"({clause})")
             values.extend(vals)
 
-    if mode == 'all':
-        where_sql = ' AND '.join(where_clauses)
-    else:
-        where_sql = ' OR '.join(where_clauses)
+    where_sql = ' AND '.join(where_clauses) if mode == 'all' else ' OR '.join(where_clauses)
 
-    query = f"SELECT * FROM notes WHERE archived = 0"
+    query = "SELECT * FROM notes WHERE archived = 0"
     if where_sql:
         query += f" AND ({where_sql})"
 

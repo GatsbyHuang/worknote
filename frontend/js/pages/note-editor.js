@@ -9,20 +9,20 @@ function runWhenIdleOrLater(callback) {
   }
 }
 
-async function loadCategories() {
-  try {
-    const res = await fetch('/api/categories');
-    const categories = await res.json();
-    const select = document.getElementById('categorySelect');
-    select.innerHTML = '<option value="">Select category</option>';
-    categories.forEach(cat => {
-      const opt = document.createElement('option');
-      opt.value = cat;
-      opt.textContent = cat;
-      select.appendChild(opt);
-    });
-  } catch (err) {
-    console.error('❌ 無法載入 categories', err);
+async function loadCategories(notebookId, preselectCategoryId = null) {
+  const categorySelect = document.getElementById('categorySelect');
+  categorySelect.innerHTML = '<option value="">Select category</option>';
+
+  const categories = await fetch(`/api/categories?notebook_id=${notebookId}`).then(r => r.json());
+  categories.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat.id;
+    opt.textContent = cat.name;
+    categorySelect.appendChild(opt);
+  });
+
+  if (preselectCategoryId) {
+    categorySelect.value = preselectCategoryId;
   }
 }
 
@@ -30,6 +30,40 @@ async function loadCategories() {
 
 export async function init() {
   console.log('[📝] 初始化 Note Editor 頁面');
+
+  const params = new URLSearchParams(location.hash.split('?')[1] || '');
+  const urlNotebookId = params.get('notebook');
+  const urlCategoryId = params.get('category');
+  const noteId = sessionStorage.getItem('currentNoteId');
+
+  // 儲存當前 notebook/categoryId 到 sessionStorage（若有）
+  if (urlNotebookId) sessionStorage.setItem('currentNotebookId', urlNotebookId);
+  if (urlCategoryId) sessionStorage.setItem('currentCategoryId', urlCategoryId);
+
+  const notebookId = sessionStorage.getItem('currentNotebookId');
+  const categoryId = sessionStorage.getItem('currentCategoryId');
+
+  // 載入 notebooks
+  const notebooks = await fetch('/api/notebooks').then(r => r.json());
+  const notebookSelect = document.getElementById('notebookSelect');
+  notebooks.forEach(nb => {
+    const opt = document.createElement('option');
+    opt.value = nb.id;
+    opt.textContent = nb.name;
+    notebookSelect.appendChild(opt);
+  });
+  if (notebookId) notebookSelect.value = notebookId;
+
+  // 載入 categories for selected notebook
+  if (notebookId) {
+    await loadCategories(notebookId, categoryId);
+  }
+
+  // 根據 notebook 切換時重新載入 category
+  notebookSelect.addEventListener('change', async (e) => {
+    sessionStorage.setItem('currentNotebookId', e.target.value);
+    await loadCategories(e.target.value);
+  });
 
   // 初始化 TinyMCE
   tinymce?.remove();
@@ -143,49 +177,7 @@ export async function init() {
     }
   });
 
-  // 分類新增
-document.getElementById('addCategory')?.addEventListener('click', async () => {
-  const newCat = document.getElementById('newCategory').value.trim();
-  if (!newCat) return;
 
-  try {
-    const res = await fetch('/api/categories', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newCat })
-    });
-
-    if (res.ok) {
-      const select = document.getElementById('categorySelect');
-      const option = document.createElement('option');
-      option.value = newCat;
-      option.text = newCat;
-      option.selected = true;
-      select.add(option);
-      document.getElementById('newCategory').value = '';
-    } else {
-      alert('❌ 無法新增分類');
-    }
-  } catch (err) {
-    console.error('❌ 新增分類失敗：', err);
-  }
-});
-
-  // 分類刪除
-document.getElementById('deleteCategory')?.addEventListener('click', async () => {
-  const category = document.getElementById('categorySelect').value;
-  if (!category) return alert('⚠️ 請先選擇一個要刪除的分類');
-
-  if (!confirm(`確定要刪除分類「${category}」？`)) return;
-
-  const res = await fetch(`/api/categories/${category}`, { method: 'DELETE' });
-  if (res.ok) {
-    alert(`🗑 已刪除分類：${category}`);
-    loadCategories(); // refresh list
-  } else {
-    alert('❌ 刪除失敗！');
-  }
-});
 
 
 
@@ -215,15 +207,17 @@ document.getElementById('deleteCategory')?.addEventListener('click', async () =>
 
   // 載入資料進入編輯模式
 	const id = sessionStorage.getItem('currentNoteId');
-	if (id) {
+	if (noteId) {
 	  try {
-		const res = await fetch(`/api/notes/${id}`);
+		const res = await fetch(`/api/notes/${noteId}`);
 		const note = await res.json();
 		console.log('[📌] Current Note:', note);
 
 		document.getElementById('noteTitle').value = note.title || '';
-		document.getElementById('categorySelect').value = note.category || '';
 		tinymce.get('editor').setContent(note.content || '');
+
+		const categorySelect = document.getElementById('categorySelect');
+		if (note.category_id) categorySelect.value = note.category_id;
 
 		const tags = JSON.parse(note.tags || '[]');
 		tags.forEach(tagText => addTag(tagText));
@@ -248,7 +242,8 @@ document.getElementById('deleteCategory')?.addEventListener('click', async () =>
 		alert('⚠️ Please log in first. Click the avatar at the top right to select your user identity.');
 		return;
 	  }
-
+	  
+      const notebookId = document.getElementById('notebookSelect').value;
 	  const title = document.getElementById('noteTitle').value.trim();
 	  const category = document.getElementById('categorySelect').value.trim();
 	  const content = tinymce.get('editor').getContent();
@@ -259,17 +254,17 @@ document.getElementById('deleteCategory')?.addEventListener('click', async () =>
 	  if (!title || !content || !category) return alert('❗ Please fill in the title , content and category!');
 	  if (tags.length === 0) return alert('⚠️ Please enter at least one tag!');
 
-	  const payload = {
-		title,
-		category,
-		tags,
-		content,
-		userid,
-		created_at: new Date().toISOString()
-	  };
+		const payload = {
+		  title,
+		  content,
+		  tags,
+		  category_id: category,
+		  created_at: new Date().toISOString(),
+		  userid: localStorage.getItem('userId')
+		};
 
-	  const res = await fetch(id ? `/api/notes/${id}` : '/api/notes', {
-		method: id ? 'PUT' : 'POST',
+	  const res = await fetch(noteId ? `/api/notes/${noteId}` : '/api/notes', {
+		method: noteId ? 'PUT' : 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(payload)
 	  });
@@ -277,6 +272,9 @@ document.getElementById('deleteCategory')?.addEventListener('click', async () =>
 	  if (res.ok) {
 		alert('✅ Note saved successfully!');
 		sessionStorage.removeItem('currentNoteId');
+		// ✅ Refresh notes in notetree
+		window.location.hash = `#notetree?notebook=${notebookId}`;
+		window.dispatchEvent(new Event('popstate'));
 		//window.location.hash = '#history';
 		//window.dispatchEvent(new Event('popstate'));
 	  } else {
