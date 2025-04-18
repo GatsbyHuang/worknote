@@ -1,7 +1,13 @@
 
+export async function init() {
+  console.log('📤 Initializing Import Page...');
+  
+  const mergeBtn = document.getElementById('mergeBtn');
   const dbInput = document.getElementById('dbFileInput');
   const analyzeBtn = document.getElementById('analyzeBtn');
   const resultBox = document.getElementById('analysisResult');
+  
+  const notebooksCountEl = document.getElementById('notebookCount');
   const noteCountEl = document.getElementById('noteCount');
   const categoryCountEl = document.getElementById('categoryCount');
   const conflictCountEl = document.getElementById('conflictCount');
@@ -27,6 +33,7 @@
 
       const data = await res.json();
 
+	  notebooksCountEl.textContent = data.notebooks_count ?? '-';
       noteCountEl.textContent = data.note_count ?? '-';
       categoryCountEl.textContent = data.category_count ?? '-';
       conflictCountEl.textContent = data.conflict_count ?? '0';
@@ -37,7 +44,6 @@
       console.error(err);
     }
   });
-
 
 	mergeBtn.addEventListener('click', async () => {
 	  const file = dbInput.files[0];
@@ -61,9 +67,17 @@
 		if (!res.ok) throw new Error('Server error');
 
 		const result = await res.json();
-		alert(`✅ Merge completed: ${result.notes_merged || 0} notes, ${result.categories_merged || 0} categories.`);
+
+		alert(`✅ Merge completed:
+	📓 Notebooks: ${result.notebooks_merged || 0}
+	📂 Categories: ${result.categories_merged || 0}
+	📝 Notes: ${result.notes_merged || 0}`);
 	  } catch (err) {
 		alert('❌ Merge failed.');
 		console.error(err);
 	  }
 	});
+
+}
+
+

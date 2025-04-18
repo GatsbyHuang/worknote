@@ -26,11 +26,14 @@
       <h2 class="text-lg font-semibold text-gray-800">Analysis Result</h2>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-        <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
-          <span>📝</span> <span>Notes:</span> <span id="noteCount" class="ml-auto font-bold text-blue-600">-</span>
+	    <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+          <span>📂</span> <span>Notebook:</span> <span id="notebookCount" class="ml-auto font-bold text-indigo-600">-</span>
         </div>
         <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
           <span>📂</span> <span>Categories:</span> <span id="categoryCount" class="ml-auto font-bold text-indigo-600">-</span>
+        </div>
+        <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+          <span>📝</span> <span>Notes:</span> <span id="noteCount" class="ml-auto font-bold text-blue-600">-</span>
         </div>
         <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
           <span>⚠️</span> <span>Conflicts:</span> <span id="conflictCount" class="ml-auto font-bold text-yellow-600">-</span>
@@ -61,18 +64,5 @@
     </div>
   </div>
 
-  <script>
-    const dbInput = document.getElementById('dbFileInput');
-    const analyzeBtn = document.getElementById('analyzeBtn');
-    const resultBox = document.getElementById('analysisResult');
-
-    dbInput.addEventListener('change', () => {
-      analyzeBtn.disabled = !dbInput.files.length;
-    });
-
-    analyzeBtn.addEventListener('click', () => {
-      alert('🔧 Analysis logic not implemented yet.');
-    });
-  </script>
 </body>
 </html>

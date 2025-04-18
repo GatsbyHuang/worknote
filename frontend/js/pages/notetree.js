@@ -381,11 +381,14 @@ if (!window.__contextMenuSetupDone__) {
     contextMenu.classList.remove('hidden');
   });
 
-  document.addEventListener('click', e => {
-    if (!e.target.closest('#contextMenu')) {
-      contextMenu.classList.add('hidden');
-    }
-  });
+document.addEventListener('click', e => {
+  const contextMenu = document.getElementById('contextMenu');
+  if (!contextMenu) return; // ⛑ 若切到其它頁面沒有 contextMenu，避免報錯
+
+  if (!e.target.closest('#contextMenu')) {
+    contextMenu.classList.add('hidden');
+  }
+});
 
   document.getElementById('cancelContext')?.addEventListener('click', () => {
     contextMenu.classList.add('hidden');
