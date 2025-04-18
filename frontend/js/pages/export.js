@@ -14,7 +14,7 @@ async function loadNotebookList() {
 }
 
 async function loadTagList() {
-  await loadList('/api/tags', 'tagList', 'count', 'name');
+  await loadList('/api/tags', 'tagList', 'name', 'name');
 }
 
 async function loadCategoryList() {
@@ -67,6 +67,10 @@ function getExportPayload() {
 }
 
 async function previewExport() {
+  const previewBtn = document.getElementById('previewBtn');
+  previewBtn.disabled = true;
+  previewBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
   const payload = getExportPayload();
   try {
     const res = await fetch('/api/export/preview', {
@@ -79,11 +83,34 @@ async function previewExport() {
   } catch (err) {
     console.error('❌ Preview failed', err);
     alert('❌ Failed to preview export');
+  } finally {
+    previewBtn.disabled = false;
+    previewBtn.classList.remove('opacity-50', 'cursor-not-allowed');
   }
 }
 
+
 async function executeExport() {
+  const exportBtn = document.getElementById('exportBtn');
+  exportBtn.disabled = true;
+  exportBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
   const payload = getExportPayload();
+
+  // 🚨 若都沒選任何條件，直接擋下
+  const noConditionSelected =
+    payload.notebooks.length === 0 &&
+    payload.tags.length === 0 &&
+    payload.categories.length === 0 &&
+    payload.userids.length === 0;
+
+  if (noConditionSelected) {
+    alert('⚠️ 請至少選擇一個 Notebook / Tag / Category / User 條件才能匯出！');
+    exportBtn.disabled = false;
+    exportBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    return;
+  }
+
   try {
     const res = await fetch('/api/export/execute', {
       method: 'POST',
@@ -99,5 +126,10 @@ async function executeExport() {
   } catch (err) {
     console.error('❌ Export failed', err);
     alert('❌ Export failed');
+  } finally {
+    exportBtn.disabled = false;
+    exportBtn.classList.remove('opacity-50', 'cursor-not-allowed');
   }
 }
+
+
