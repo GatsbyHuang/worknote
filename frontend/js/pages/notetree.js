@@ -4,6 +4,7 @@ let currentCategory = null;
 let currentNotebookId = null;
 let currentRightClickNoteId = null;
 let currentRightClickCategory = null;
+let noteTreeReady = false;
 
 export async function init() {
   console.log('🧭 Note Browser Page Loaded');
@@ -209,6 +210,8 @@ async function loadCategories() {
   });
 
   if (categories[0]) selectSection(categories[0].id);
+  noteTreeReady = true;
+
 }
 
 function setActiveSection(categoryId) {
@@ -356,6 +359,12 @@ function setupContextMenu() {
 
 if (!window.__contextMenuSetupDone__) {
   document.addEventListener('contextmenu', e => {
+	  
+	if (!noteTreeReady) {
+		e.preventDefault();
+		console.log('⏳ noteTree not ready, blocking context menu');
+		return;
+	}
     const noteEl = e.target.closest('[data-note-id]');
     const catEl = e.target.closest('[data-category]');
 
