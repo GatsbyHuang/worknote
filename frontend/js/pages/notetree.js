@@ -76,47 +76,6 @@ function onDocReady(){
     });
 
 
-      // 📌 右鍵選單邏輯
-      let currentRightClickNoteId = null;
-      const contextMenu = document.getElementById('contextMenu');
-      const deleteOption = document.getElementById('deleteNoteOption');
-      const cancelOption = document.getElementById('cancelContext');
-
-      document.addEventListener('contextmenu', e => {
-        const noteEl = e.target.closest('[data-note-id]');
-        if (noteEl) {
-          e.preventDefault();
-          currentRightClickNoteId = noteEl.dataset.noteId;
-          contextMenu.style.top = `${e.pageY}px`;
-          contextMenu.style.left = `${e.pageX}px`;
-          contextMenu.classList.remove('hidden');
-        } else {
-          contextMenu.classList.add('hidden');
-        }
-      });
-
-      document.addEventListener('click', e => {
-        if (!e.target.closest('#contextMenu')) {
-          contextMenu.classList.add('hidden');
-        }
-      });
-
-      deleteOption.addEventListener('click', async () => {
-        if (!currentRightClickNoteId) return;
-        if (!confirm('Are you sure you want to delete this note?')) return;
-
-        const res = await fetch(`/api/notes/${currentRightClickNoteId}`, { method: 'DELETE' });
-        if (res.ok) {
-          contextMenu.classList.add('hidden');
-          location.reload();
-        } else {
-          alert('❌ Failed to delete note.');
-        }
-      });
-
-      cancelOption?.addEventListener('click', () => {
-        contextMenu.classList.add('hidden');
-      });
  
     
 }
@@ -196,7 +155,7 @@ function setupButtonEvents() {
       newNoteEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
       const noteDetail = await fetchNoteDetail(newNoteId);
-      await showEditor(noteDetail);
+      await showPrevEditor(noteDetail);
     }
   };
 
@@ -286,9 +245,11 @@ async function selectSection(categoryId) {
       e.dataTransfer.setData('text/plain', note.id);
     });
 
-    li.addEventListener('click', () => {
+	li.addEventListener('click', async () => {
       setActiveNote(note.id);
-      showEditor(note);
+      //showEditor(note);
+	  showPrevEditor(note);
+
     });
 
     li.addEventListener('contextmenu', e => {
@@ -304,6 +265,78 @@ async function selectSection(categoryId) {
   });
 }
 
+function renderNoteDetail(note) {
+		
+	const viewer = document.getElementById('noteViewer');
+	const hint = document.getElementById('noteEmptyHint');
+	viewer.classList.remove('hidden');
+	hint.classList.add('hidden');
+
+	document.getElementById('noteTitle_pre').textContent = note.title || 'Untitled';
+	document.getElementById('noteCategory').textContent = note.category_name || '-';
+	document.getElementById('noteTime').textContent = new Date(note.created_at).toLocaleString();
+
+
+	// Tags
+	const tagsEl = document.getElementById('noteTags');
+	tagsEl.innerHTML = '';
+
+	// ✅ 修正：將字串 tags 解析為陣列
+	let tagList = [];
+	try {
+	  tagList = typeof note.tags === 'string' ? JSON.parse(note.tags) : (note.tags || []);
+	} catch (err) {
+	  console.warn('Invalid tags format:', note.tags);
+	}
+
+	tagList.forEach(tag => {
+	  const span = document.createElement('span');
+	  span.className = 'inline-block bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full';
+	  span.textContent = `#${tag}`;
+	  tagsEl.appendChild(span);
+	});
+
+
+	// Content
+	const contentEl = document.getElementById('noteContent');
+	contentEl.innerHTML = note.content || '';
+
+	lucide.createIcons();
+	
+	document.getElementById('closeEditModalBtn')?.addEventListener('click', () => {
+	  document.getElementById('noteEditModal')?.classList.add('hidden');
+	});
+	
+	document.getElementById('editNoteBtn')?.addEventListener('click', async () => {
+	  lucide.createIcons();
+	  sessionStorage.setItem('currentNoteId', note.id);
+
+	  const modal = document.getElementById('noteEditModal');
+	  const container = document.getElementById('noteEditorContainer');
+	  const loading = document.getElementById('noteEditLoading'); // 👈 loading 層
+
+	  modal.classList.remove('hidden');
+	  loading?.classList.remove('hidden'); // 顯示 loading 動畫
+
+	  try {
+		const html = await fetch('/pages/note-editor.html').then(res => res.text());
+		container.innerHTML = html;
+
+		const module = await import('/js/pages/note-editor.js');
+		await module.init();
+
+	  } catch (err) {
+		console.error('❌ 載入編輯器頁面失敗：', err);
+		container.innerHTML = `<div class="text-red-600 p-4">❌ 無法載入編輯器，請稍後再試。</div>`;
+	  } finally {
+		loading?.classList.add('hidden'); // 無論成功或失敗都隱藏 loading
+	  }
+	});
+
+
+}
+
+
 export async function fetchNotesByCategory(categoryId) {
   const res = await fetch(`/api/notes?category_id=${categoryId}`);
   if (!res.ok) throw new Error('Failed to fetch notes');
@@ -317,10 +350,8 @@ export async function fetchNoteDetail(id) {
 }
 
 function setupContextMenu() {
-  const contextMenu = document.getElementById('contextMenu');
   const noteMenu = document.getElementById('noteMenu');
   const categoryMenu = document.getElementById('categoryMenu');
-  const deleteNoteOption = document.getElementById('deleteNoteOption');
   const deleteCategoryOption = document.getElementById('deleteCategoryOption');
 
 if (!window.__contextMenuSetupDone__) {
@@ -411,6 +442,18 @@ if (!window.__contextMenuSetupDone__) {
 }
 }
 
+async function showPrevEditor(note) {
+  try {
+	const res = await fetch(`/api/notes/${note.id}`);
+	if (!res.ok) throw new Error('Fetch failed');
+	const fullNote = await res.json();
+	renderNoteDetail(fullNote);
+  } catch (err) {
+	alert('❌ Failed to load note detail.');
+	console.error(err);
+  }
+	
+}
 
 async function showEditor(note) {
   sessionStorage.setItem('currentNoteId', note.id);

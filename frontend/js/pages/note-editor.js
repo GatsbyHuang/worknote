@@ -190,7 +190,7 @@ export async function init() {
       const res = await fetch(`/api/notes/${noteId}`);
       const note = await res.json();
       console.log('[📌] Current Note:', note);
-
+	  console.log(document.getElementById('noteTitle'))
       document.getElementById('noteTitle').value = note.title || '';
       tinymce.get('editor').setContent(note.content || '');
 

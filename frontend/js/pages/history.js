@@ -118,6 +118,8 @@ function renderNotes(notes) {
     li.className = 'p-3 rounded-lg bg-white shadow-sm hover:shadow transition space-y-1 cursor-pointer';
 
     const time = formatRelativeTime(note.created_at);
+	const exactTime = new Date(note.created_at).toLocaleString(); // tooltip
+
 
     // Notebook badge
     const notebook = `<span class="bg-gray-200 text-gray-900 text-xs px-2 py-0.5 rounded">${note.notebook_name || 'No Notebook'}</span>`;
@@ -143,9 +145,9 @@ function renderNotes(notes) {
         <div class="flex items-center gap-2 whitespace-nowrap">
           <button class="text-blue-500 hover:underline edit-btn">✏️ Edit</button>
           <button class="text-red-500 hover:underline delete-btn">🗑 Delete</button>
-          <span class="text-gray-400">
-            🧑 ${note.userid || 'anonymous'} ・ ${time}
-          </span>
+		  <span class="text-gray-400" title="${exactTime}">
+			🧑 ${note.userid || 'anonymous'} ・ ${time}
+		  </span>
         </div>
       </div>
       <div class="text-sm font-semibold text-gray-800 truncate">${note.title}</div>

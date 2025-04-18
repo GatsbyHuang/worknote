@@ -1,45 +1,70 @@
 <div class="max-w-5xl mx-auto space-y-6 px-4 py-6">
   <h1 class="text-2xl font-bold text-gray-800">📜 Note History</h1>
 
-  <!-- 篩選區 -->
-<!-- 篩選區 -->
-<div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+  <!-- 🔎 篩選區（卡片樣式） -->
+  <div class="bg-white rounded-xl shadow-sm px-4 py-3 flex flex-col md:flex-row md:justify-between md:items-center gap-3">
 
-  <!-- 左側：Search + Filters -->
-  <div class="flex flex-wrap gap-2 items-center flex-grow">
-    <input type="text" id="searchInput" placeholder="🔍 Search by title or tag"
-      class="px-3 py-1 border border-gray-300 rounded-lg text-sm shadow-sm flex-grow min-w-[200px]" />
+    <!-- 左側：Search + Filters -->
+    <div class="flex flex-wrap gap-2 items-center flex-grow">
+      <input type="text" id="searchInput" placeholder="🔍 Search by title or tag"
+        class="px-3 py-1 border border-gray-300 rounded-lg text-sm shadow-sm flex-grow min-w-[200px]" />
 
-    <select id="filterCategory" class="px-2 py-1 border border-gray-300 rounded-lg text-sm shadow-sm">
+      <select id="filterCategory" class="px-2 py-1 border border-gray-300 rounded-lg text-sm shadow-sm">
+        <!-- dynamic options -->
+      </select>
 
-    </select>
+      <select id="sortSelect" class="px-2 py-1 border border-gray-300 rounded-lg text-sm shadow-sm">
+        <option value="newest">📅 Newest First</option>
+        <option value="oldest">Oldest First</option>
+        <option value="az">A → Z</option>
+      </select>
 
-    <select id="sortSelect" class="px-2 py-1 border border-gray-300 rounded-lg text-sm shadow-sm">
-      <option value="newest">📅 Newest First</option>
-      <option value="oldest">Oldest First</option>
-      <option value="az">A → Z</option>
-    </select>
+      <button id="toggleViewBtn" class="text-sm text-gray-600 hover:underline ml-2">🌓 Full</button>
+      <a href="#" id="clearFilters" class="text-sm text-blue-600 hover:underline ml-2">🧹 Clear</a>
+    </div>
 
-    <button id="toggleViewBtn" class="text-sm text-gray-600 hover:underline ml-2">🌓 Full</button>
-    <a href="#" id="clearFilters" class="text-sm text-blue-600 hover:underline ml-2">🧹 Clear</a>
+    <!-- 右側：Limit -->
+    <div id="limitBtns" class="text-sm text-gray-600 whitespace-nowrap flex gap-2 items-center">
+      <span>Limit:</span>
+      <!-- 按鈕會由 JS 插入 -->
+    </div>
   </div>
 
-  <!-- 右側：Limit -->
-	<!-- limit-btn-container 為動態產出按鈕的容器 -->
-	<div id="limitBtns" class="text-sm text-gray-600 whitespace-nowrap flex gap-2 items-center">
-	  <span>Limit:</span>
-	</div>
-</div>
-
-
-
-
-
-  <!-- 筆記列表 -->
-  <ul id="historyNoteList" class="divide-y divide-gray-200 text-sm bg-white rounded-xl shadow-sm p-4">
-    <li class="py-2 text-gray-400">Loading...</li>
+  <!-- 📄 筆記列表 -->
+  <ul id="historyNoteList" class="divide-y divide-gray-200 text-sm bg-white rounded-xl shadow p-4 space-y-4">
+    <li class="text-gray-400">Loading...</li>
   </ul>
+
+  <!-- 📊 Footer 統計（可選）-->
+  <div class="text-sm text-gray-500 pt-2 text-right">
+    <span id="noteStats">Found 0 notes.</span>
+  </div>
 </div>
 
-<!-- Fuse.js 模糊搜尋支援 -->
+<!-- 🔍 Fuse.js 模糊搜尋 -->
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+
+<!-- 💡 Hover tag & time 支援的建議 CSS -->
+<style>
+  .note-card {
+    @apply transition hover:shadow-md rounded-xl border p-4 bg-white;
+  }
+  .note-tag {
+    @apply inline-block rounded-full px-2 py-0.5 text-xs font-medium;
+  }
+
+  /* 🟢 Notebook tag 色系 */
+  .tag-notebook {
+    @apply bg-blue-50 text-blue-700;
+  }
+
+  /* 🟡 Category tag 色系 */
+  .tag-category {
+    @apply bg-yellow-50 text-yellow-700;
+  }
+
+  /* 🟣 普通 tag 色系 */
+  .tag-normal {
+    @apply bg-gray-100 text-gray-800;
+  }
+</style>

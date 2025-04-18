@@ -48,9 +48,15 @@ def get_all_notes(limit=None, tag=None, category_id=None, userid=None):
 
 def get_note_by_id(note_id):
     conn = get_db()
-    note = conn.execute("SELECT * FROM notes WHERE id = ?", (note_id,)).fetchone()
+    note = conn.execute("""
+        SELECT notes.*, categories.name AS category_name
+        FROM notes
+        LEFT JOIN categories ON notes.category_id = categories.id
+        WHERE notes.id = ?
+    """, (note_id,)).fetchone()
     conn.close()
     return dict(note) if note else None
+
 
 def create_note(data, userid):
     print("\U0001f9ea [DEBUG] 接收到 tags:", data.get('tags'))
