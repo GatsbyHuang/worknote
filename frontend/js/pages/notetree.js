@@ -352,43 +352,67 @@ export async function fetchNoteDetail(id) {
   return await res.json();
 }
 
+function showTooltip(message, x, y) {
+  const tooltip = document.getElementById('contextTooltip');
+  if (!tooltip) return;
+
+  tooltip.textContent = message;
+  tooltip.style.top = `${y + 10}px`;
+  tooltip.style.left = `${x + 10}px`;
+  tooltip.classList.remove('hidden');
+  tooltip.style.opacity = '1';
+
+  clearTimeout(tooltip._hideTimer);
+  tooltip._hideTimer = setTimeout(() => {
+    tooltip.style.opacity = '0';
+    setTimeout(() => tooltip.classList.add('hidden'), 300);
+  }, 2000);
+}
+
 function setupContextMenu() {
   const noteMenu = document.getElementById('noteMenu');
   const categoryMenu = document.getElementById('categoryMenu');
   const deleteCategoryOption = document.getElementById('deleteCategoryOption');
 
 if (!window.__contextMenuSetupDone__) {
-  document.addEventListener('contextmenu', e => {
-	  
-	if (!noteTreeReady) {
-		e.preventDefault();
-		console.log('⏳ noteTree not ready, blocking context menu');
+	
+	
+	document.addEventListener('contextmenu', e => {
+	  const contextMenu = document.getElementById('contextMenu');
+	  const noteMenu = document.getElementById('noteMenu');
+	  const categoryMenu = document.getElementById('categoryMenu');
+
+	  if (!contextMenu || !noteMenu || !categoryMenu) {
+		console.warn('❌ contextMenu DOM not found. Canceling menu display.');
 		return;
-	}
-    const noteEl = e.target.closest('[data-note-id]');
-    const catEl = e.target.closest('[data-category]');
+	  }
 
-    if (noteEl) {
-      e.preventDefault();
-      currentRightClickNoteId = noteEl.dataset.noteId;
-      currentRightClickCategory = null;
-      noteMenu.classList.remove('hidden');
-      categoryMenu.classList.add('hidden');
-    } else if (catEl) {
-      e.preventDefault();
-      currentRightClickCategory = catEl.dataset.category;
-      currentRightClickNoteId = null;
-      noteMenu.classList.add('hidden');
-      categoryMenu.classList.remove('hidden');
-    } else {
-      contextMenu.classList.add('hidden');
-      return;
-    }
+	  const noteEl = e.target.closest('[data-note-id]');
+	  const catEl = e.target.closest('[data-category]');
 
-    contextMenu.style.top = `${e.pageY}px`;
-    contextMenu.style.left = `${e.pageX}px`;
-    contextMenu.classList.remove('hidden');
-  });
+	  if (noteEl) {
+		e.preventDefault();
+		currentRightClickNoteId = noteEl.dataset.noteId;
+		currentRightClickCategory = null;
+		noteMenu.classList.remove('hidden');
+		categoryMenu.classList.add('hidden');
+	  } else if (catEl) {
+		e.preventDefault();
+		currentRightClickCategory = catEl.dataset.category;
+		currentRightClickNoteId = null;
+		noteMenu.classList.add('hidden');
+		categoryMenu.classList.remove('hidden');
+	  } else {
+		// fallback - 點擊無效區域，關掉 menu
+		contextMenu.classList.add('hidden');
+		return;
+	  }
+
+	  contextMenu.style.top = `${e.pageY}px`;
+	  contextMenu.style.left = `${e.pageX}px`;
+	  contextMenu.classList.remove('hidden');
+	});
+
 
 document.addEventListener('click', e => {
   const contextMenu = document.getElementById('contextMenu');

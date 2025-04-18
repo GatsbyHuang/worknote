@@ -6,6 +6,8 @@ export async function init() {
   const dbInput = document.getElementById('dbFileInput');
   const analyzeBtn = document.getElementById('analyzeBtn');
   const resultBox = document.getElementById('analysisResult');
+  const clearFileBtn = document.getElementById('clearFileBtn');
+
   
   const notebooksCountEl = document.getElementById('notebookCount');
   const noteCountEl = document.getElementById('noteCount');
@@ -15,6 +17,12 @@ export async function init() {
   dbInput.addEventListener('change', () => {
     analyzeBtn.disabled = !dbInput.files.length;
   });
+
+	clearFileBtn?.addEventListener('click', () => {
+	  dbInput.value = '';
+	  resultBox.classList.add('hidden');
+	  analyzeBtn.disabled = true;
+	});
 
   analyzeBtn.addEventListener('click', async () => {
     const file = dbInput.files[0];
