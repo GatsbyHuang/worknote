@@ -3,7 +3,10 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
-*.db
+
+
+# === Exclude all .db under backend/ ===
+backend/**/*.db
 
 # virtual environment
 .env/
