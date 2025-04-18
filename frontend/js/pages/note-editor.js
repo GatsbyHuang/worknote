@@ -1,6 +1,5 @@
 import Fuse from 'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.esm.min.js';
 
-
 function runWhenIdleOrLater(callback) {
   if ('requestIdleCallback' in window) {
     requestIdleCallback(callback);
@@ -26,8 +25,6 @@ async function loadCategories(notebookId, preselectCategoryId = null) {
   }
 }
 
-
-
 export async function init() {
   console.log('[📝] 初始化 Note Editor 頁面');
 
@@ -36,14 +33,12 @@ export async function init() {
   const urlCategoryId = params.get('category');
   const noteId = sessionStorage.getItem('currentNoteId');
 
-  // 儲存當前 notebook/categoryId 到 sessionStorage（若有）
   if (urlNotebookId) sessionStorage.setItem('currentNotebookId', urlNotebookId);
   if (urlCategoryId) sessionStorage.setItem('currentCategoryId', urlCategoryId);
 
   const notebookId = sessionStorage.getItem('currentNotebookId');
   const categoryId = sessionStorage.getItem('currentCategoryId');
 
-  // 載入 notebooks
   const notebooks = await fetch('/api/notebooks').then(r => r.json());
   const notebookSelect = document.getElementById('notebookSelect');
   notebooks.forEach(nb => {
@@ -54,120 +49,110 @@ export async function init() {
   });
   if (notebookId) notebookSelect.value = notebookId;
 
-  // 載入 categories for selected notebook
   if (notebookId) {
     await loadCategories(notebookId, categoryId);
   }
 
-  // 根據 notebook 切換時重新載入 category
   notebookSelect.addEventListener('change', async (e) => {
     sessionStorage.setItem('currentNotebookId', e.target.value);
     await loadCategories(e.target.value);
   });
 
-  // 初始化 TinyMCE
   tinymce?.remove();
-	await tinymce.init({
-	  selector: '#editor',
-	  plugins: 'code codesample link image lists fullscreen table ',  // 加上 fullscreen
-	  toolbar: 'undo redo | table | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | codesample | link image | code | fullscreen', // 加入 fullscreen 按鈕
-	  table_toolbar: "tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol",
-	  height: 500,
-	  branding: false,
-	  license_key: 'gpl',
-	  codesample_languages: [
-		{ text: 'HTML/XML', value: 'markup' },
-		{ text: 'JavaScript', value: 'javascript' },
-		{ text: 'Python', value: 'python' },
-		{ text: 'Shell', value: 'bash' },
-		{ text: 'SQL', value: 'sql' }
-	  ],
-	  codesample_content_css: 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css'
-	});
-
+  await tinymce.init({
+    selector: '#editor',
+    plugins: 'code codesample link image lists fullscreen table ',
+    toolbar: 'undo redo | table | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | codesample | link image | code | fullscreen',
+    table_toolbar: "tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol",
+    height: 500,
+    branding: false,
+    license_key: 'gpl',
+    codesample_languages: [
+      { text: 'HTML/XML', value: 'markup' },
+      { text: 'JavaScript', value: 'javascript' },
+      { text: 'Python', value: 'python' },
+      { text: 'Shell', value: 'bash' },
+      { text: 'SQL', value: 'sql' }
+    ],
+    codesample_content_css: 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css'
+  });
 
   await loadCategories();
 
-	const tagContainer = document.getElementById('tagContainer');
-	const tagInput = document.getElementById('tagInput');
+  const tagContainer = document.getElementById('tagContainer');
+  const tagInput = document.getElementById('tagInput');
 
-	function addTag(text) {
-	  const cleaned = text.trim().toLowerCase(); // 統一比對格式
-	  if (!cleaned) return;
+  function addTag(text) {
+    const cleaned = text.trim().toLowerCase();
+    if (!cleaned) return;
+    const existing = Array.from(tagContainer.querySelectorAll('span'))
+      .some(el => el.firstChild?.nodeValue.trim().toLowerCase() === cleaned);
+    if (existing) return;
 
-	  // 檢查是否已存在同名 tag
-	  const existing = Array.from(tagContainer.querySelectorAll('span'))
-		.some(el => el.firstChild?.nodeValue.trim().toLowerCase() === cleaned);
-	  if (existing) return;
+    const tag = document.createElement('span');
+    tag.className = 'bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm flex items-center gap-1';
+    tag.innerHTML = `${text}<button class="ml-1 text-gray-600 hover:text-red-500" onclick="this.parentElement.remove()">&times;</button>`;
+    tagContainer.insertBefore(tag, tagInput);
+  }
 
-	  // 建立 tag 元素
-	  const tag = document.createElement('span');
-	  tag.className = 'bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm flex items-center gap-1';
-	  tag.innerHTML = `${text}<button class="ml-1 text-gray-600 hover:text-red-500" onclick="this.parentElement.remove()">&times;</button>`;
-	  tagContainer.insertBefore(tag, tagInput);
-	}
+  function buildRelatedList(currentNote, allNotes) {
+    const list = document.getElementById('relatedList');
+    if (!list || !currentNote || !allNotes.length) return;
 
+    const currentTags = new Set(
+      Array.isArray(currentNote.tags)
+        ? currentNote.tags
+        : JSON.parse(currentNote.tags || '[]')
+    );
+    const currentTitle = (currentNote.title || '').toLowerCase();
 
+    const related = allNotes.filter(note => {
+      if (note.id === currentNote.id) return false;
 
-	function buildRelatedList(currentNote, allNotes) {
-	  const list = document.getElementById('relatedList');
-	  if (!list || !currentNote || !allNotes.length) return;
+      const titleMatch = note.title?.toLowerCase().includes(currentTitle);
 
-	  const currentTags = new Set(
-		Array.isArray(currentNote.tags)
-		  ? currentNote.tags
-		  : JSON.parse(currentNote.tags || '[]')
-	  );
-	  const currentTitle = (currentNote.title || '').toLowerCase();
+      let tags = [];
+      try {
+        tags = Array.isArray(note.tags) ? note.tags : JSON.parse(note.tags || '[]');
+      } catch {
+        tags = [];
+      }
+      const tagMatch = tags.some(tag => currentTags.has(tag));
 
-	  const related = allNotes.filter(note => {
-		if (note.id === currentNote.id) return false;
+      return titleMatch || tagMatch;
+    });
 
-		const titleMatch = note.title?.toLowerCase().includes(currentTitle);
+    list.innerHTML = '';
 
-		let tags = [];
-		try {
-		  tags = Array.isArray(note.tags) ? note.tags : JSON.parse(note.tags || '[]');
-		} catch {
-		  tags = [];
-		}
-		const tagMatch = tags.some(tag => currentTags.has(tag));
+    if (!related.length) {
+      list.innerHTML = '<li class="text-gray-400">No related notes found.</li>';
+      return;
+    }
 
-		return titleMatch || tagMatch;
-	  });
+    const container = document.createElement('div');
+    container.className = 'flex flex-wrap gap-3';
 
-	  list.innerHTML = '';
+    related.forEach(note => {
+      const a = document.createElement('a');
+      a.href = '#';
+      a.className = 'text-blue-600 hover:underline whitespace-nowrap';
+      a.textContent = note.title;
+      a.dataset.id = note.id;
 
-	  if (!related.length) {
-		list.innerHTML = '<li class="text-gray-400">No related notes found.</li>';
-		return;
-	  }
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        sessionStorage.setItem('currentNoteId', note.id);
+        window.location.hash = '#note-editor';
+        window.dispatchEvent(new Event('popstate'));
+      });
 
-	  // 🔁 用 span + inline 方式呈現一行
-	  const container = document.createElement('div');
-	  container.className = 'flex flex-wrap gap-3';
+      container.appendChild(a);
+    });
 
-	  related.forEach(note => {
-		const a = document.createElement('a');
-		a.href = '#';
-		a.className = 'text-blue-600 hover:underline whitespace-nowrap';
-		a.textContent = note.title;
-		a.dataset.id = note.id;
-
-		a.addEventListener('click', (e) => {
-		  e.preventDefault();
-		  sessionStorage.setItem('currentNoteId', note.id);
-		  window.location.hash = '#note-editor';
-		  window.dispatchEvent(new Event('popstate'));
-		});
-
-		container.appendChild(a);
-	  });
-
-	  const li = document.createElement('li');
-	  li.appendChild(container);
-	  list.appendChild(li);
-	}
+    const li = document.createElement('li');
+    li.appendChild(container);
+    list.appendChild(li);
+  }
 
   tagInput?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && tagInput.value.trim()) {
@@ -177,11 +162,6 @@ export async function init() {
     }
   });
 
-
-
-
-
-  // 顯示 tag 建議
   async function loadTagSuggestions() {
     try {
       const res = await fetch('/api/tags');
@@ -205,82 +185,77 @@ export async function init() {
 
   await loadTagSuggestions();
 
-  // 載入資料進入編輯模式
-	const id = sessionStorage.getItem('currentNoteId');
-	if (noteId) {
-	  try {
-		const res = await fetch(`/api/notes/${noteId}`);
-		const note = await res.json();
-		console.log('[📌] Current Note:', note);
+  if (noteId) {
+    try {
+      const res = await fetch(`/api/notes/${noteId}`);
+      const note = await res.json();
+      console.log('[📌] Current Note:', note);
 
-		document.getElementById('noteTitle').value = note.title || '';
-		tinymce.get('editor').setContent(note.content || '');
+      document.getElementById('noteTitle').value = note.title || '';
+      tinymce.get('editor').setContent(note.content || '');
 
-		const categorySelect = document.getElementById('categorySelect');
-		if (note.category_id) categorySelect.value = note.category_id;
+      const categorySelect = document.getElementById('categorySelect');
+      if (note.category_id) categorySelect.value = note.category_id;
 
-		const tags = JSON.parse(note.tags || '[]');
-		tags.forEach(tagText => addTag(tagText));
+      const tags = JSON.parse(note.tags || '[]');
+      tags.forEach(tagText => addTag(tagText));
 
-		// 🚀 載入全部筆記來找 related
-		const allRes = await fetch('/api/notes');
-		const allNotes = await allRes.json();
-	    //頁面空閒時才觸發比對與渲染，不會拖慢主畫面的初始化。
-		runWhenIdleOrLater(() => buildRelatedList(note, allNotes));
+      const allRes = await fetch('/api/notes');
+      const allNotes = await allRes.json();
+      runWhenIdleOrLater(() => buildRelatedList(note, allNotes));
+    } catch (err) {
+      console.error('❌ 載入筆記失敗：', err);
+    }
+  }
 
-	  } catch (err) {
-		console.error('❌ 載入筆記失敗：', err);
-	  }
-	}
+  // ✅ Save handler 防止多次綁定
+  if (window.__saveHandler__) {
+    document.getElementById('saveBtn')?.removeEventListener('click', window.__saveHandler__);
+  }
 
+  const saveHandler = async () => {
+    const userid = localStorage.getItem('userId');
+    if (!userid) {
+      alert('⚠️ Please log in first. Click the avatar at the top right to select your user identity.');
+      return;
+    }
 
+    const notebookId = document.getElementById('notebookSelect').value;
+    const title = document.getElementById('noteTitle').value.trim();
+    const category = document.getElementById('categorySelect').value.trim();
+    const content = tinymce.get('editor').getContent();
+    const tags = Array.from(document.querySelectorAll('#tagContainer span'))
+      .map(el => el.firstChild?.nodeValue?.trim())
+      .filter(Boolean);
 
-	// Save button
-	document.getElementById('saveBtn')?.addEventListener('click', async () => {
-	  const userid = localStorage.getItem('userId');
-	  if (!userid) {
-		alert('⚠️ Please log in first. Click the avatar at the top right to select your user identity.');
-		return;
-	  }
-	  
-      const notebookId = document.getElementById('notebookSelect').value;
-	  const title = document.getElementById('noteTitle').value.trim();
-	  const category = document.getElementById('categorySelect').value.trim();
-	  const content = tinymce.get('editor').getContent();
-	  const tags = Array.from(document.querySelectorAll('#tagContainer span'))
-		.map(el => el.firstChild?.nodeValue?.trim())
-		.filter(Boolean);
+    if (!title || !content || !category) return alert('❗ Please fill in the title , content and category!');
+    if (tags.length === 0) return alert('⚠️ Please enter at least one tag!');
 
-	  if (!title || !content || !category) return alert('❗ Please fill in the title , content and category!');
-	  if (tags.length === 0) return alert('⚠️ Please enter at least one tag!');
+    const payload = {
+      title,
+      content,
+      tags,
+      category_id: category,
+      created_at: new Date().toISOString(),
+      userid: localStorage.getItem('userId')
+    };
 
-		const payload = {
-		  title,
-		  content,
-		  tags,
-		  category_id: category,
-		  created_at: new Date().toISOString(),
-		  userid: localStorage.getItem('userId')
-		};
+    const res = await fetch(noteId ? `/api/notes/${noteId}` : '/api/notes', {
+      method: noteId ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
-	  const res = await fetch(noteId ? `/api/notes/${noteId}` : '/api/notes', {
-		method: noteId ? 'PUT' : 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(payload)
-	  });
+    if (res.ok) {
+      alert('✅ Note saved successfully!');
+      sessionStorage.removeItem('currentNoteId');
+      window.location.hash = `#notetree?notebook=${notebookId}`;
+      window.dispatchEvent(new Event('popstate'));
+    } else {
+      alert('❌ Failed to save the note.');
+    }
+  };
 
-	  if (res.ok) {
-		alert('✅ Note saved successfully!');
-		sessionStorage.removeItem('currentNoteId');
-		// ✅ Refresh notes in notetree
-		window.location.hash = `#notetree?notebook=${notebookId}`;
-		window.dispatchEvent(new Event('popstate'));
-		//window.location.hash = '#history';
-		//window.dispatchEvent(new Event('popstate'));
-	  } else {
-		alert('❌ Failed to save the note.');
-	  }
-	});
-
-
+  document.getElementById('saveBtn')?.addEventListener('click', saveHandler);
+  window.__saveHandler__ = saveHandler;
 }

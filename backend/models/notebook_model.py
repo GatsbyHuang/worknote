@@ -47,6 +47,17 @@ def update_notebook_by_id(notebook_id, data):
 
 def delete_notebook_by_id(notebook_id):
     conn = get_db()
+
+    # 🔍 先檢查是否有 category 使用這個 notebook_id
+    linked = conn.execute("SELECT COUNT(*) FROM categories WHERE notebook_id = ?", (notebook_id,)).fetchone()[0]
+    print(f"linked categories:{linked}")
+    if linked > 0:
+        return {
+            'body': {'error': f'Notebook is still linked to {linked} categories.'},
+            'status': 500
+        }
+
+    # ✅ 沒有任何關聯 category，才允許刪除
     with conn:
         cur = conn.execute("DELETE FROM notebooks WHERE id = ?", (notebook_id,))
         if cur.rowcount == 0:

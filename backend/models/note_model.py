@@ -8,9 +8,12 @@ def get_all_notes(limit=None, tag=None, category_id=None, userid=None):
     cur = conn.cursor()
 
     query = """
-        SELECT n.*, c.name AS category_name
+        SELECT n.*, 
+               c.name AS category_name,
+               nb.name AS notebook_name
         FROM notes n
         LEFT JOIN categories c ON n.category_id = c.id
+        LEFT JOIN notebooks nb ON c.notebook_id = nb.id
         WHERE n.archived = 0
     """
     params = []
@@ -38,10 +41,10 @@ def get_all_notes(limit=None, tag=None, category_id=None, userid=None):
         if tag and tag not in note['tags']:
             continue
 
-
         notes.append(note)
 
     return notes
+
 
 def get_note_by_id(note_id):
     conn = get_db()

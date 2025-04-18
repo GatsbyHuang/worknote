@@ -3,8 +3,12 @@
   <h1 class="text-2xl font-bold text-gray-800">📊 Dashboard</h1>
 
   <!-- Overview Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
     <div class="bg-white rounded-xl p-4 shadow-sm">
+      <div class="text-sm text-gray-500">Notebooks</div>
+      <div class="text-2xl font-bold text-gray-700" id="statNotebooks">?</div>
+    </div>
+	<div class="bg-white rounded-xl p-4 shadow-sm">
       <div class="text-sm text-gray-500">Total Notes</div>
       <div class="text-2xl font-bold text-gray-700" id="statTotal">?</div>
     </div>
@@ -24,18 +28,20 @@
 
   <!-- Chart + Top Lists -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Top Notebooks -->
+    <div class="bg-white rounded-xl p-4 shadow-sm">
+      <h2 class="text-lg font-semibold text-gray-700 mb-2">📒 Top Notebooks</h2>
+      <ul id="topNotebooks" class="text-sm text-gray-700 space-y-1">
+        <li class="text-gray-400">Loading...</li>
+      </ul>
+    </div>
+
     <!-- Top Tags -->
     <div class="bg-white rounded-xl p-4 shadow-sm">
       <h2 class="text-lg font-semibold text-gray-700 mb-2">🏷️ Top Tags</h2>
       <ul id="topTags" class="text-sm text-gray-700 space-y-1">
         <li class="text-gray-400">Loading...</li>
       </ul>
-    </div>
-
-    <!-- Tag Chart -->
-    <div class="bg-white rounded-xl p-4 shadow-sm">
-      <h2 class="text-lg font-semibold text-gray-700 mb-2">📊 Tag Distribution</h2>
-      <canvas id="tagChart" class="w-full h-[240px]"></canvas>
     </div>
 
     <!-- Top Categories -->

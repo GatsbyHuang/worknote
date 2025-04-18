@@ -11,10 +11,120 @@ export async function init() {
   // ✅ 從 URL 取得 notebook id
   const params = new URLSearchParams(location.hash.split('?')[1] || '');
   currentNotebookId = params.get('notebook');
-
+  onDocReady();
   await loadCategories();
   setupContextMenu();
   setupButtonEvents();
+}
+
+function onDocReady(){
+    
+      console.log("initi notetree ondocumentready")
+      safeLucideRefresh();
+      
+
+      // 拖拉支援（單筆）
+      document.addEventListener('dragstart', (e) => {
+        if (e.target.matches('[data-note-id]')) {
+          const noteId = e.target.dataset.noteId;
+          e.dataTransfer.setData('noteId', noteId);
+        }
+      });
+
+    document.querySelectorAll('#sectionItems').forEach(list => {
+      list.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const targetLi = e.target.closest('li[data-category]');
+        if (targetLi) {
+          targetLi.classList.add('ring-2', 'ring-blue-400', 'bg-blue-50');
+        }
+      });
+
+      list.addEventListener('dragleave', (e) => {
+        const targetLi = e.target.closest('li[data-category]');
+        if (targetLi) {
+          targetLi.classList.remove('ring-2', 'ring-blue-400', 'bg-blue-50');
+        }
+      });
+
+      list.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        const noteId = e.dataTransfer.getData('noteId');
+        const targetLi = e.target.closest('li[data-category]');
+        if (!noteId || !targetLi) return;
+
+        const newCategoryId = targetLi.dataset.category;
+
+        const res = await fetch(`/api/notes/${noteId}/category`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category_id: newCategoryId })
+        });
+
+        targetLi.classList.remove('ring-2', 'ring-blue-400', 'bg-blue-50');
+
+        if (res.ok) {
+          if (typeof window.selectSection === 'function') {
+            await window.selectSection(newCategoryId);
+          } else if (typeof window.loadCategories === 'function') {
+            await window.loadCategories();
+          }
+        } else {
+          alert('❌ Failed to move note');
+        }
+      });
+    });
+
+
+      // 📌 右鍵選單邏輯
+      let currentRightClickNoteId = null;
+      const contextMenu = document.getElementById('contextMenu');
+      const deleteOption = document.getElementById('deleteNoteOption');
+      const cancelOption = document.getElementById('cancelContext');
+
+      document.addEventListener('contextmenu', e => {
+        const noteEl = e.target.closest('[data-note-id]');
+        if (noteEl) {
+          e.preventDefault();
+          currentRightClickNoteId = noteEl.dataset.noteId;
+          contextMenu.style.top = `${e.pageY}px`;
+          contextMenu.style.left = `${e.pageX}px`;
+          contextMenu.classList.remove('hidden');
+        } else {
+          contextMenu.classList.add('hidden');
+        }
+      });
+
+      document.addEventListener('click', e => {
+        if (!e.target.closest('#contextMenu')) {
+          contextMenu.classList.add('hidden');
+        }
+      });
+
+      deleteOption.addEventListener('click', async () => {
+        if (!currentRightClickNoteId) return;
+        if (!confirm('Are you sure you want to delete this note?')) return;
+
+        const res = await fetch(`/api/notes/${currentRightClickNoteId}`, { method: 'DELETE' });
+        if (res.ok) {
+          contextMenu.classList.add('hidden');
+          location.reload();
+        } else {
+          alert('❌ Failed to delete note.');
+        }
+      });
+
+      cancelOption?.addEventListener('click', () => {
+        contextMenu.classList.add('hidden');
+      });
+ 
+    
+}
+
+function safeLucideRefresh() {
+  if (window.lucide?.createIcons) {
+    lucide.createIcons();
+  }
 }
 
 function setupButtonEvents() {

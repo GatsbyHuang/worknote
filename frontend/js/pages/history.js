@@ -72,6 +72,7 @@ async function loadCategories() {
     categoryFilter.appendChild(allOpt);
 
     categories.forEach(cat => {
+	  console.log(categories)
       const opt = document.createElement('option');
       opt.value = cat.id;           // ✅ category_id
       opt.textContent = cat.name;   // ✅ 顯示名稱
@@ -98,90 +99,95 @@ async function loadCategories() {
     return rtf.format(-Math.floor(diffSec / 86400), 'day');
   }
 
-  function renderNotes(notes) {
-    listContainer.innerHTML = '';
-    if (!notes.length) {
-      listContainer.innerHTML = '<li class="py-2 text-gray-400">No matching notes.</li>';
-      return;
+function renderNotes(notes) {
+  listContainer.innerHTML = '';
+  if (!notes.length) {
+    listContainer.innerHTML = '<li class="py-2 text-gray-400">No matching notes.</li>';
+    return;
+  }
+
+  document.getElementById('noteStats')?.remove();
+  const stats = document.createElement('div');
+  stats.id = 'noteStats';
+  stats.className = 'text-sm text-gray-500 px-1';
+  stats.innerHTML = `📄 Found ${notes.length} of ${allNotes.length} notes`;
+  listContainer.before(stats);
+
+  notes.slice(0, currentLimit).forEach(note => {
+    const li = document.createElement('li');
+    li.className = 'p-3 rounded-lg bg-white shadow-sm hover:shadow transition space-y-1 cursor-pointer';
+
+    const time = formatRelativeTime(note.created_at);
+
+    // Notebook badge
+    const notebook = `<span class="bg-gray-200 text-gray-900 text-xs px-2 py-0.5 rounded">${note.notebook_name || 'No Notebook'}</span>`;
+
+    // Category badge
+    const category = `<span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded">${note.category_name}</span>`;
+
+    // Tag badges
+    let tagHTML = '';
+    try {
+      const tags = Array.isArray(note.tags) ? note.tags : JSON.parse(note.tags || '[]');
+      tagHTML = tags.map(tag => {
+        const color = getTagColor(tag);
+        return `<button class="text-xs px-2 py-0.5 rounded tag-btn" style="background-color:${color}">${tag}</button>`;
+      }).join(' ');
+    } catch (err) {
+      console.warn('[⚠️ tag parse failed]', note.tags, err);
     }
 
-    document.getElementById('noteStats')?.remove();
-    const stats = document.createElement('div');
-    stats.id = 'noteStats';
-    stats.className = 'text-sm text-gray-500 px-1';
-    stats.innerHTML = `📄 Found ${notes.length} of ${allNotes.length} notes`;
-    listContainer.before(stats);
+    li.innerHTML = `
+      <div class="flex justify-between items-center flex-wrap gap-2 text-xs">
+        <div class="flex flex-wrap gap-2 items-center">${notebook} ${category} ${tagHTML}</div>
+        <div class="flex items-center gap-2 whitespace-nowrap">
+          <button class="text-blue-500 hover:underline edit-btn">✏️ Edit</button>
+          <button class="text-red-500 hover:underline delete-btn">🗑 Delete</button>
+          <span class="text-gray-400">
+            🧑 ${note.userid || 'anonymous'} ・ ${time}
+          </span>
+        </div>
+      </div>
+      <div class="text-sm font-semibold text-gray-800 truncate">${note.title}</div>
+      <div class="text-sm text-gray-600 preview">${note.content.replace(/<[^>]+>/g, '').slice(0, 100)}...</div>
+      <div class="text-sm text-gray-700 full hidden">${note.content}</div>
+    `;
 
-    notes.slice(0, currentLimit).forEach(note => {
-      const li = document.createElement('li');
-      li.className = 'p-3 rounded-lg bg-white shadow-sm hover:shadow transition space-y-1 cursor-pointer';
-
-      const time = formatRelativeTime(note.created_at);
-      const category = `<span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded">${note.category}</span>`;
-
-      let tagHTML = '';
-      try {
-        const tags = Array.isArray(note.tags) ? note.tags : JSON.parse(note.tags || '[]');
-        tagHTML = tags.map(tag => {
-          const color = getTagColor(tag);
-          return `<button class="text-xs px-2 py-0.5 rounded tag-btn" style="background-color:${color}">${tag}</button>`;
-        }).join(' ');
-      } catch (err) {
-        console.warn('[⚠️ tag parse failed]', note.tags, err);
-      }
-
-	li.innerHTML = `
-	  <div class="flex justify-between items-center flex-wrap gap-2 text-xs">
-		<div class="flex flex-wrap gap-2 items-center">${category} ${tagHTML}</div>
-		<div class="flex items-center gap-2 whitespace-nowrap">
-		  <button class="text-blue-500 hover:underline edit-btn">✏️ Edit</button>
-		  <button class="text-red-500 hover:underline delete-btn">🗑 Delete</button>
-		  <span class="text-gray-400">
-			🧑 ${note.userid || 'anonymous'} ・ ${time}
-		  </span>
-		</div>
-	  </div>
-	  <div class="text-sm font-semibold text-gray-800 truncate">${note.title}</div>
-	  <div class="text-sm text-gray-600 preview">${note.content.replace(/<[^>]+>/g, '').slice(0, 100)}...</div>
-	  <div class="text-sm text-gray-700 full hidden">${note.content}</div>
-	`;
-
-
-      li.querySelectorAll('.tag-btn')?.forEach(btn => {
-        btn.addEventListener('click', e => {
-          e.stopPropagation();
-          searchInput.value = btn.textContent;
-          applyFilters();
-        });
-      });
-
-      li.querySelector('.edit-btn')?.addEventListener('click', e => {
+    li.querySelectorAll('.tag-btn')?.forEach(btn => {
+      btn.addEventListener('click', e => {
         e.stopPropagation();
-        sessionStorage.setItem('currentNoteId', note.id);
-        window.location.hash = '#note-editor';
-        window.dispatchEvent(new Event('popstate'));
+        searchInput.value = btn.textContent;
+        applyFilters();
       });
-
-      li.querySelector('.delete-btn')?.addEventListener('click', async e => {
-        e.stopPropagation();
-        if (confirm(`確定刪除「${note.title}」？`)) {
-          const res = await fetch(`/api/notes/${note.id}`, { method: 'DELETE' });
-          if (res.ok) {
-            allNotes = allNotes.filter(n => n.id !== note.id);
-            applyFilters();
-          }
-        }
-      });
-
-      li.addEventListener('click', e => {
-        if (e.target.closest('button')) return;
-        li.querySelector('.preview')?.classList.toggle('hidden');
-        li.querySelector('.full')?.classList.toggle('hidden');
-      });
-
-      listContainer.appendChild(li);
     });
-  }
+
+    li.querySelector('.edit-btn')?.addEventListener('click', e => {
+      e.stopPropagation();
+      sessionStorage.setItem('currentNoteId', note.id);
+      window.location.hash = '#note-editor';
+      window.dispatchEvent(new Event('popstate'));
+    });
+
+    li.querySelector('.delete-btn')?.addEventListener('click', async e => {
+      e.stopPropagation();
+      if (confirm(`確定刪除「${note.title}」？`)) {
+        const res = await fetch(`/api/notes/${note.id}`, { method: 'DELETE' });
+        if (res.ok) {
+          allNotes = allNotes.filter(n => n.id !== note.id);
+          applyFilters();
+        }
+      }
+    });
+
+    li.addEventListener('click', e => {
+      if (e.target.closest('button')) return;
+      li.querySelector('.preview')?.classList.toggle('hidden');
+      li.querySelector('.full')?.classList.toggle('hidden');
+    });
+
+    listContainer.appendChild(li);
+  });
+}
 
   function initFuzzySearchAsync() {
     if (!window.requestIdleCallback) return setTimeout(buildFuse, 300);
@@ -216,7 +222,7 @@ async function loadCategories() {
     }
 
     if (category) {
-      result = result.filter(note => note.category === category);
+      result = result.filter(note => String(note.category_id) === category);
     }
 
     if (sort === 'newest') {

@@ -1,8 +1,6 @@
 export async function init() {
   console.log('[📊] 初始化 Dashboard');
-	
 
-	
   try {
     const statsRes = await fetch('/api/dashboard');
     const stats = await statsRes.json();
@@ -12,6 +10,21 @@ export async function init() {
     document.getElementById('statCategories').textContent = stats.unique_categories;
     document.getElementById('statTags').textContent = stats.unique_tags;
     document.getElementById('statLastUpdated').textContent = formatRelativeTime(stats.last_updated);
+    document.getElementById('statNotebooks').textContent = stats.total_notebooks;
+
+    // Top Notebooks
+    const nbList = document.getElementById('topNotebooks');
+    if (nbList) {
+      nbList.innerHTML = stats.top_notebooks.map(nb => {
+        const percent = ((nb.count / stats.total_notes) * 100).toFixed(1);
+        const bgColor = getCategoryColor(nb.name);
+        return `
+          <li class="flex justify-between items-center px-3 py-1 rounded shadow-sm" style="background-color:${bgColor}">
+            <span class="font-medium text-gray-800">${nb.name}</span>
+            <span class="text-xs text-gray-600">(${nb.count} / ${percent}%)</span>
+          </li>`;
+      }).join('');
+    }
 
     // Tags 統計
     const tagRes = await fetch('/api/tags');
@@ -31,35 +44,6 @@ export async function init() {
         </li>`;
     }).join('');
 
-    // Chart
-    const ctx = document.getElementById('tagChart');
-    new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: sortedTags.map(t => t.name),
-        datasets: [{
-          data: sortedTags.map(t => t.count),
-          backgroundColor: sortedTags.map(t => getTagColor(t.name))
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          tooltip: {
-            callbacks: {
-              label: function (context) {
-                const count = context.parsed;
-                const label = context.label;
-                const percent = ((count / totalTagCount) * 100).toFixed(1);
-                return `${label}: ${count} (${percent}%)`;
-              }
-            }
-          },
-          legend: { position: 'bottom' }
-        }
-      }
-    });
-
     // Recent Notes
     const noteRes = await fetch('/api/notes?limit=10');
     const notes = await noteRes.json();
@@ -67,7 +51,6 @@ export async function init() {
     list.innerHTML = '';
     renderNoteList(notes, list, getTagColor);
 
-    // Top Categories
     renderTopCategories(notes);
 
     // Limit control
@@ -130,9 +113,11 @@ function renderNoteList(notes, list, getTagColor) {
   notes.forEach(note => {
     const li = document.createElement('li');
     li.className = 'p-3 rounded-lg bg-white shadow-sm hover:shadow-md transition space-y-1 cursor-pointer';
-
+	
+	
     const time = new Date(note.created_at).toLocaleString('sv-SE').replace(' ', '&nbsp;');
-    const category = `<span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded">${note.category}</span>`;
+    const notebook = `<span class="bg-gray-200 text-gray-900 text-xs px-2 py-0.5 rounded">${note.notebook_name || 'No Notebook'}</span>`;
+	const category = `<span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded">${note.category_name}</span>`;
 
     let tagHTML = '';
     try {
@@ -144,19 +129,19 @@ function renderNoteList(notes, list, getTagColor) {
     } catch { }
 
     li.innerHTML = `
-	  <div class="flex justify-between items-center flex-wrap gap-2 text-xs">
-		<div class="flex flex-wrap gap-2 items-center">${category} ${tagHTML}</div>
-		<div class="flex items-center gap-2 whitespace-nowrap">
-		  <button class="text-blue-500 hover:underline edit-btn">✏️ Edit</button>
-		  <button class="text-red-500 hover:underline delete-btn">🗑 Delete</button>
-		  <span class="text-gray-400">
-			🧑 ${note.userid || 'anonymous'} ・ ${time}
-		  </span>
-		</div>
+    <div class="flex justify-between items-center flex-wrap gap-2 text-xs">
+      <div class="flex flex-wrap gap-2 items-center">${notebook}${category} ${tagHTML}</div>
+      <div class="flex items-center gap-2 whitespace-nowrap">
+        <button class="text-blue-500 hover:underline edit-btn">✏️ Edit</button>
+        <button class="text-red-500 hover:underline delete-btn">🗑 Delete</button>
+        <span class="text-gray-400">
+          🧑 ${note.userid || 'anonymous'} ・ ${time}
+        </span>
       </div>
-      <div class="text-sm font-semibold text-gray-800 truncate">${note.title}</div>
-      <div class="text-sm text-gray-600 preview">${note.content.replace(/<[^>]+>/g, '').slice(0, 100)}...</div>
-      <div class="text-sm text-gray-700 hidden full">${note.content}</div>
+    </div>
+    <div class="text-sm font-semibold text-gray-800 truncate">${note.title}</div>
+    <div class="text-sm text-gray-600 preview">${note.content.replace(/<[^>]+>/g, '').slice(0, 100)}...</div>
+    <div class="text-sm text-gray-700 hidden full">${note.content}</div>
     `;
 
     li.querySelector('.edit-btn')?.addEventListener('click', e => {
@@ -183,7 +168,6 @@ function renderNoteList(notes, list, getTagColor) {
   });
 }
 
-// 顏色對應
 function getTagColor(tag) {
   const hash = [...tag].reduce((acc, c) => acc + c.charCodeAt(0), 0);
   const hue = hash % 360;

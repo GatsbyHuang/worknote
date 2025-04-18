@@ -7,66 +7,84 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="text-gray-800 font-sans min-h-screen bg-gray-50">
-  <div class="max-w-5xl mx-auto px-6 py-8 space-y-6">
-    <h1 class="text-2xl font-bold text-gray-800">🧾 Export Notes</h1>
+<div class="max-w-6xl mx-auto px-6 py-8 space-y-6">
+  <h1 class="text-2xl font-bold text-gray-800">🧾 Export Notes</h1>
 
-    <!-- Filters -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div>
-        <label class="block text-sm font-medium mb-1">Tags</label>
-        <select id="filterTags" multiple class="w-full px-3 py-2 border rounded-lg shadow-sm text-sm bg-white">
-          <!-- populated dynamically -->
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium mb-1">Categories</label>
-        <select id="filterCategories" multiple class="w-full px-3 py-2 border rounded-lg shadow-sm text-sm bg-white">
-          <!-- populated dynamically -->
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium mb-1">User IDs</label>
-        <select id="filterUserIDs" multiple class="w-full px-3 py-2 border rounded-lg shadow-sm text-sm bg-white">
-          <!-- populated dynamically -->
-        </select>
-      </div>
+  <!-- Filters 區塊 -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <!-- ✅ Notebook -->
+    <div>
+      <h2 class="text-sm font-medium mb-1 text-gray-600">📓 Notebooks</h2>
+      <ul id="notebookList" class="space-y-1 text-sm bg-white border rounded p-2 max-h-60 overflow-y-auto shadow-sm">
+        <li class="text-gray-400">Loading...</li>
+      </ul>
     </div>
 
-    <!-- Match mode -->
-    <div class="mt-4">
-      <label class="block text-sm font-medium mb-1">Match Mode</label>
-      <div class="flex items-center gap-6">
-        <label class="inline-flex items-center">
-          <input type="radio" name="matchMode" value="any" class="text-blue-500" checked>
-          <span class="ml-2">Any (OR)</span>
-        </label>
-        <label class="inline-flex items-center">
-          <input type="radio" name="matchMode" value="all" class="text-blue-500">
-          <span class="ml-2">All (AND)</span>
-        </label>
-      </div>
+    <!-- ✅ Categories -->
+    <div>
+      <h2 class="text-sm font-medium mb-1 text-gray-600">📂 Categories</h2>
+      <ul id="categoryList" class="space-y-1 text-sm bg-white border rounded p-2 max-h-60 overflow-y-auto shadow-sm">
+        <li class="text-gray-400">Loading...</li>
+      </ul>
+    </div>
+    
+
+    <!-- ✅ Tags -->
+    <div>
+      <h2 class="text-sm font-medium mb-1 text-gray-600">🏷️ Tags</h2>
+      <ul id="tagList" class="space-y-1 text-sm bg-white border rounded p-2 max-h-60 overflow-y-auto shadow-sm">
+        <!-- 動態填入 -->
+      </ul>
     </div>
 
-    <!-- Result & action -->
-    <div class="mt-6 bg-white p-4 rounded-xl shadow-sm border">
-      <p class="text-sm text-gray-700">Estimated notes to export: <span id="noteCount" class="font-semibold text-blue-600">0</span></p>
-      <div class="mt-4 flex gap-4">
-        <button id="previewBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow">🔍 Preview</button>
-        <button id="exportBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow">📦 Export</button>
-      </div>
+    <!-- ✅ Users -->
+    <div>
+      <h2 class="text-sm font-medium mb-1 text-gray-600">🧑 Users</h2>
+      <ul id="userList" class="space-y-1 text-sm bg-white border rounded p-2 max-h-60 overflow-y-auto shadow-sm">
+        <li class="text-gray-400">Loading...</li>
+      </ul>
     </div>
-
   </div>
-	<p id="exportMessage" class="mt-4 text-sm text-green-600 font-medium"></p>
+
+  <!-- Match Mode -->
+  <div class="mt-4">
+    <h2 class="text-sm font-medium mb-1 text-gray-600">Match Mode</h2>
+    <div class="flex items-center gap-6 text-sm text-gray-700 bg-white border rounded p-2 shadow-sm">
+      <label class="inline-flex items-center">
+        <input type="radio" name="matchMode" value="any" class="text-blue-500" checked>
+        <span class="ml-2">Any (OR)</span>
+      </label>
+      <label class="inline-flex items-center">
+        <input type="radio" name="matchMode" value="all" class="text-blue-500">
+        <span class="ml-2">All (AND)</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Export Block -->
+  <div class="bg-white p-4 rounded-xl shadow-sm border mt-4">
+    <p class="text-sm text-gray-700">Estimated notes to export:
+      <span id="noteCount" class="font-semibold text-blue-600">0</span>
+    </p>
+    <div class="mt-4 flex gap-4">
+      <button id="previewBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow">
+        🔍 Preview
+      </button>
+      <button id="exportBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow">
+        📦 Export
+      </button>
+    </div>
+  </div>
+
+  <p id="exportMessage" class="text-sm text-green-600 font-medium"></p>
+</div>
 
   <script>
     // Placeholder: Populate selects & preview count (to be implemented)
     document.getElementById('previewBtn').addEventListener('click', () => {
       document.getElementById('noteCount').textContent = Math.floor(Math.random() * 50); // mock result
     });
-
   </script>
 </body>
+
 </html>
