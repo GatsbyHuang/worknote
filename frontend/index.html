@@ -196,7 +196,13 @@
       <button id="cancelNotebookContext" class="block w-full text-left px-4 py-2 hover:bg-gray-100">✖️ Cancel</button>
     </div>
 
-  
+	  <!-- 🔔 Version Update Banner -->
+	<div id="versionBanner" class="hidden fixed top-4 right-4 bg-yellow-100 text-yellow-800 border border-yellow-300 px-4 py-2 rounded-lg shadow-md z-[1000] text-sm flex items-center gap-2">
+	  <span>🚀 有新版本可用！</span>
+	  <a href="https://github.com/GatsbyHuang/worknote/tree/master" target="_blank" class="underline hover:text-yellow-700">前往下載</a>
+	  <button onclick="document.getElementById('versionBanner').classList.add('hidden')" class="ml-2 text-gray-500 hover:text-gray-700">✖</button>
+	</div>
+
 
   <script src="js/router.js"></script>
 
