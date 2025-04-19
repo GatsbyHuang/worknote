@@ -8,6 +8,21 @@ export function init() {
  * 顯示筆記內容到右側 preview viewer 區域
  * @param {Object} note - 筆記物件
  */
+ 
+ 
+export function showLoadingSpinner() {
+  document.getElementById('noteViewer')?.classList.remove('hidden');
+  document.getElementById('noteEmptyHint')?.classList.add('hidden');
+  document.getElementById('noteLoading')?.classList.remove('hidden');
+  document.getElementById('noteContentWrapper')?.classList.add('hidden');
+}
+
+export function hideLoadingSpinner() {
+  document.getElementById('noteLoading')?.classList.add('hidden');
+  document.getElementById('noteContentWrapper')?.classList.remove('hidden');
+}
+
+ 
 export function renderNoteDetail(note) {
 	const viewer = document.getElementById('noteViewer');
 	const hint = document.getElementById('noteEmptyHint');

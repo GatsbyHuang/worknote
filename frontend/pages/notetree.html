@@ -75,10 +75,26 @@
     <!-- 分隔線 -->
     <hr class="border-gray-200" />
 
-    <!-- Rich Content -->
-    <article id="noteContent" class="prose max-w-none prose-img:rounded-lg prose-img:shadow-md">
-      <!-- rich content goes here -->
-    </article>
+	<!-- Loading Spinner -->
+	<div id="noteLoading" class="hidden text-center py-8 text-gray-500">
+	  <div class="animate-spin rounded-full h-6 w-6 border-2 border-blue-400 border-t-transparent mx-auto mb-2"></div>
+	  <div class="text-sm">Loading note...</div>
+	</div>
+
+	<!-- 🧩 包住原內容 -->
+	<div id="noteContentWrapper">
+	  <!-- Tags -->
+	  <div id="noteTags" class="flex flex-wrap gap-2 text-sm mb-4"></div>
+
+	  <!-- 分隔線 -->
+	  <hr class="border-gray-200 mb-4" />
+
+	  <!-- Rich Content -->
+	  <article id="noteContent" class="prose max-w-none prose-img:rounded-lg prose-img:shadow-md">
+		<!-- rich content goes here -->
+	  </article>
+	</div>
+
 
   </div>
 

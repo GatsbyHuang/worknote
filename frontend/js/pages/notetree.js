@@ -374,10 +374,12 @@ document.addEventListener('click', e => {
 
 async function showPrevEditor(note) {
   try {
+    preview.showLoadingSpinner();
 	const res = await fetch(`/api/notes/${note.id}`);
 	if (!res.ok) throw new Error('Fetch failed');
 	const fullNote = await res.json();
 	preview.renderNoteDetail(fullNote);
+	preview.hideLoadingSpinner();
   } catch (err) {
 	alert('❌ Failed to load note detail.');
 	console.error(err);
