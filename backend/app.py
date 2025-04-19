@@ -9,6 +9,7 @@ from routes.categories import categories_bp
 from routes.export import export_bp
 from routes.imports import import_bp
 from routes.notebook import notebooks_bp
+from routes.version import version_bp
 #from routes.search_file import attachment_api
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='/')
@@ -25,6 +26,7 @@ app.register_blueprint(notebooks_bp)
 app.register_blueprint(categories_bp)
 app.register_blueprint(export_bp)
 app.register_blueprint(import_bp)
+app.register_blueprint(version_bp)
 #app.register_blueprint(attachment_api)
 
 

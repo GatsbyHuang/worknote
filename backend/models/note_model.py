@@ -10,7 +10,8 @@ def get_all_notes(limit=None, tag=None, category_id=None, userid=None):
     query = """
         SELECT n.*, 
                c.name AS category_name,
-               nb.name AS notebook_name
+               nb.name AS notebook_name,
+               nb.id AS notebook_id
         FROM notes n
         LEFT JOIN categories c ON n.category_id = c.id
         LEFT JOIN notebooks nb ON c.notebook_id = nb.id

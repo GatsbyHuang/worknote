@@ -12,10 +12,18 @@ export async function init() {
   // ✅ 從 URL 取得 notebook id
   const params = new URLSearchParams(location.hash.split('?')[1] || '');
   currentNotebookId = params.get('notebook');
+  const preloadNoteId = sessionStorage.getItem('currentNoteId');
+  const preloadCategoryId = params.get('category');
+  
   onDocReady();
-  await loadCategories();
+  await loadCategories(preloadCategoryId, preloadNoteId);
   setupContextMenu();
   setupButtonEvents();
+  
+
+
+
+
 }
 
 function onDocReady(){
@@ -165,7 +173,7 @@ function setupButtonEvents() {
 }
 
 
-async function loadCategories() {
+async function loadCategories(preloadCategoryId = null, preloadNoteId = null) {
   if (!currentNotebookId) return;
   const res = await fetch(`/api/categories?notebook_id=${currentNotebookId}`);
   const categories = await res.json();
@@ -209,7 +217,12 @@ async function loadCategories() {
     sectionList.appendChild(li);
   });
 
-  if (categories[0]) selectSection(categories[0].id);
+  if (preloadCategoryId) {
+	  await selectSection(preloadCategoryId, preloadNoteId);
+	} else if (categories[0]) {
+	  await selectSection(categories[0].id);
+	}
+
   noteTreeReady = true;
 
 }
@@ -229,7 +242,7 @@ function setActiveNote(noteId) {
   if (match) match.classList.add('bg-blue-100', 'text-blue-700', 'font-semibold', 'ring');
 }
 
-async function selectSection(categoryId) {
+async function selectSection(categoryId, noteToSelect = null) {
   currentCategory = categoryId;
   setActiveSection(categoryId);
 
@@ -266,6 +279,16 @@ async function selectSection(categoryId) {
 
     noteList.appendChild(li);
   });
+  
+  if (noteToSelect) {
+	  const match = document.querySelector(`[data-note-id='${noteToSelect}']`);
+	  if (match) {
+		match.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		match.classList.add('bg-blue-100', 'font-semibold', 'ring');
+		const note = await fetchNoteDetail(noteToSelect);
+		renderNoteDetail(note);
+	  }
+	}
 }
 
 function renderNoteDetail(note) {
