@@ -1,3 +1,7 @@
+export async function onBefore() {
+  console.log('[📊] Dashboard loading...');
+}
+
 export async function init() {
   console.log('[📊] 初始化 Dashboard');
 
@@ -5,7 +9,7 @@ export async function init() {
     const statsRes = await fetch('/api/dashboard');
     const stats = await statsRes.json();
 
-    // 更新 Overview Cards
+    // 更新卡片統計
     document.getElementById('statTotal').textContent = stats.total_notes;
     document.getElementById('statCategories').textContent = stats.unique_categories;
     document.getElementById('statTags').textContent = stats.unique_tags;
@@ -26,13 +30,12 @@ export async function init() {
       }).join('');
     }
 
-    // Tags 統計
+    // Tags
     const tagRes = await fetch('/api/tags');
     const tagData = await tagRes.json();
     const sortedTags = tagData.sort((a, b) => b.count - a.count).slice(0, 20);
     const totalTagCount = tagData.reduce((sum, tag) => sum + tag.count, 0);
 
-    // Top Tags
     const tagList = document.getElementById('topTags');
     tagList.innerHTML = sortedTags.map(tag => {
       const color = getTagColor(tag.name);
@@ -44,22 +47,18 @@ export async function init() {
         </li>`;
     }).join('');
 
-    // Recent Notes
+    // Recent notes
     const noteRes = await fetch('/api/notes?limit=10');
     const notes = await noteRes.json();
     const list = document.getElementById('recentNoteList');
-    list.innerHTML = '';
     renderNoteList(notes, list, getTagColor);
-
     renderTopCategories(notes);
 
-    // Limit control
     document.querySelectorAll('.limit-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const n = btn.dataset.limit;
         const r = await fetch(`/api/notes?limit=${n}`);
         const notes = await r.json();
-        list.innerHTML = '';
         renderNoteList(notes, list, getTagColor);
         renderTopCategories(notes);
       });
@@ -67,8 +66,14 @@ export async function init() {
 
   } catch (err) {
     console.error('❌ Dashboard 載入失敗：', err);
+    document.getElementById('main-content').innerHTML = `
+      <div class="text-red-600 p-6">
+        ❌ Dashboard 載入失敗，請稍後再試。
+        <pre class="text-xs mt-2">${err.message}</pre>
+      </div>`;
   }
 }
+
 
 function formatRelativeTime(dateStr) {
   const now = new Date();
@@ -173,6 +178,17 @@ function getTagColor(tag) {
   const hue = hash % 360;
   return `hsl(${hue}, 70%, 85%)`;
 }
+
 function getCategoryColor(cat) {
   return getTagColor(cat);
 }
+
+export async function onAfter() {
+  console.log('[📊] Dashboard loaded.');
+}
+
+export async function onError(err) {
+  console.error('[📊] Dashboard 發生錯誤：', err);
+}
+
+// 其餘 helper 保持不變...
