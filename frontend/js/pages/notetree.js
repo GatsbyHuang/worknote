@@ -129,9 +129,12 @@ async function loadCategories(preloadCategoryId = null, preloadNoteId = null) {
 	  tab.textContent = cat.name;
 	  tab.dataset.category = cat.id;
 	  tab.className =
-		'px-3 py-1 rounded-full text-sm text-gray-700 bg-gray-100 hover:bg-blue-100 hover:text-blue-600 transition whitespace-nowrap';
+		'px-3 py-1 rounded-full text-sm font-medium text-gray-700 bg-gray-100 hover:bg-blue-100 hover:text-blue-600 border border-gray-300 transition whitespace-nowrap';
 
-	  tab.addEventListener('click', () => selectSection(cat.id));
+	  tab.addEventListener('click', () => {
+		setActiveSection(cat.id);
+		selectSection(cat.id);
+	  });
 
 	  tab.addEventListener('dragover', e => {
 		e.preventDefault();
@@ -157,6 +160,7 @@ async function loadCategories(preloadCategoryId = null, preloadNoteId = null) {
 
 		if (res.ok) {
 		  console.log(`✅ Note ${noteId} moved to ${cat.name}`);
+		  setActiveSection(cat.id);
 		  selectSection(cat.id);
 		} else {
 		  alert('❌ Failed to move note');
@@ -164,9 +168,8 @@ async function loadCategories(preloadCategoryId = null, preloadNoteId = null) {
 	  });
 
 	  sectionList.appendChild(tab);
+	});
 
-
-  });
 
   if (preloadCategoryId) {
 	  await selectSection(preloadCategoryId, preloadNoteId);
