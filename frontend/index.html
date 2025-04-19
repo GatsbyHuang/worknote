@@ -183,68 +183,77 @@
 	  <button onclick="document.getElementById('versionBanner').classList.add('hidden')" class="ml-2 text-gray-500 hover:text-gray-700">✖</button>
 	</div>
 
+	<div id="pageLoading" class="fixed inset-0 z-50 bg-white bg-opacity-70 flex items-center justify-center hidden">
+	  <div class="text-center text-gray-600 text-sm">
+		<div class="animate-spin h-6 w-6 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+		Loading...
+	  </div>
+	</div>
 
-  <script src="js/router.js"></script>
 
   <script src="js/pages/fuzzy-modal.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <!-- UI Script -->
 <script type="module">
+  import Router from './js/router.js';
+  import { updateUserUI, initUserHandler } from './js/pages/user.js';
+  import { loadNotebookList, NotebookMenu, initNoteBookHandler } from './js/pages/notebook.js';
 
-    import { updateUserUI, openLoginModal, closeLoginModal, generateAvatars,initUserHandler } from './js/pages/user.js';
-    import { loadNotebookList, NotebookMenu, initNoteBookHandler } from './js/pages/notebook.js';
+  console.log('🧪 DOM Loaded');
 
-    console.log('🧪 DOM Loaded');
+  Router.onBefore((path) => {
+    console.log('⏳ Loading:', path);
+  });
 
-	 document.addEventListener('DOMContentLoaded', () => {
-	 
-		checkVersionAndNotify();
-		updateUserUI();
-		lucide.createIcons(); 
+  Router.onAfter((path) => {
+    console.log('✅ Loaded:', path);
+    updateUserUI();
+    initUserHandler();
+    initNoteBookHandler();
+    loadNotebookList();
+    NotebookMenu();
+    lucide.createIcons(); // refresh icons if needed
+  });
 
-        document.querySelectorAll('.sidebar-item').forEach(item => {
-          item.addEventListener('click', () => {
-            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-            item.classList.add('active');
-          });
-        });
+  document.addEventListener('DOMContentLoaded', () => {
+    Router.init(); // ✅ 初始化 router
 
+    // ✅ Sidebar toggle setup
+    document.getElementById('sidebarToggleBtn')?.addEventListener('click', () => {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('w-64');
+      sidebar.classList.toggle('w-0');
+      sidebar.classList.toggle('p-4');
+      sidebar.classList.toggle('overflow-y-auto');
+      sidebar.classList.toggle('hidden');
+    });
 
-	    initUserHandler();
-		initNoteBookHandler();
+    // ✅ Sidebar active state toggle
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+        item.classList.add('active');
+      });
+    });
 
-		  // 🔧 折疊 sidebar
-		  const sidebar = document.getElementById('sidebar');
-		  const mainContent = document.getElementById('main-content');
-		  const icon = document.getElementById('sidebarToggleIcon');
+    checkVersionAndNotify(); // 🔍 檢查版本
+  });
 
-		  document.getElementById('sidebarToggleBtn')?.addEventListener('click', () => {
-			sidebar.classList.toggle('w-64');
-			sidebar.classList.toggle('w-0');
-			sidebar.classList.toggle('p-4');
-			sidebar.classList.toggle('overflow-y-auto');
-			sidebar.classList.toggle('hidden');
+  async function checkVersionAndNotify() {
+    try {
+      const localVersion = await fetch('/api/version/get').then(r => r.json()).then(v => v.version);
+      const remote = await fetch('https://raw.githubusercontent.com/GatsbyHuang/worknote/master/version.json').then(r => r.json());
+      if (remote.version !== localVersion) {
+        document.getElementById('versionBanner')?.classList.remove('hidden');
+      } else {
+        console.log('🟢 Latest version.');
+      }
+    } catch (err) {
+      console.warn('⚠️ Version check failed:', err);
+    }
+  }
+</script>
 
-			// 可加動畫效果或記錄狀態
-		  });
-          
-		  loadNotebookList();
-          NotebookMenu();
-
-		});
-		
-		
-		async function checkVersionAndNotify() {
-		  const localVersion = await fetch('/api/version/get').then(r => r.json()).then(v => v.version);
-		  const remote = await fetch('https://raw.githubusercontent.com/GatsbyHuang/worknote/master/version.json').then(r => r.json());
-
-		  if (remote.version !== localVersion) {
-			document.getElementById('versionBanner')?.classList.remove('hidden');
-		  }else{
-			console.log("This is the latest version.")
-		  }
-		}
-  </script>
 </body>
 </html>
