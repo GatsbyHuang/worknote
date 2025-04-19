@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gray-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Note Browser</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="text-gray-800 font-sans h-screen overflow-hidden">
+<!-- Horizontal Tab Prototype -->
+<div class="flex flex-col h-full gap-4 p-4 bg-gray-50">
+
+  <!-- Horizontal Category Tabs -->
+  <div id="categoryTabs" class="flex flex-wrap gap-2 overflow-x-auto pb-2 border-b border-gray-200">
+    <button class="px-4 py-1 rounded-full text-sm bg-blue-100 text-blue-700 font-semibold shadow-inner">
+      Linux Cmd
+    </button>
+    <button class="px-4 py-1 rounded-full text-sm bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 transition">
+      DB
+    </button>
+    <button class="px-4 py-1 rounded-full text-sm bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 transition">
+      Script
+    </button>
+    <button class="px-4 py-1 rounded-full text-sm bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 transition">
+      Server
+    </button>
+    <button class="px-4 py-1 rounded-full text-sm bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 transition">
+      Cassandra
+    </button>
+    <button class="px-4 py-1 rounded-full text-xs text-blue-500 hover:underline">
+      + New
+    </button>
+  </div>
+
+  <!-- Main Flex Layout -->
+  <div class="flex flex-1 gap-4">
+
+    <!-- Note List -->
+    <section class="w-[280px] bg-white border rounded-xl shadow-sm p-4 space-y-3 overflow-y-auto">
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="text-sm font-semibold text-gray-700 flex gap-2 items-center">
+          <i data-lucide="file-text" class="w-4 h-4 text-blue-500"></i>
+          Notes
+        </h2>
+        <button class="text-blue-500 hover:underline text-xs">+ New</button>
+      </div>
+      <ul id="noteList" class="space-y-2 text-sm">
+        <li class="p-3 rounded-lg bg-white shadow-sm hover:shadow-md transition cursor-pointer">
+          <div class="font-semibold">Untitled</div>
+          <div class="text-gray-400 text-xs">No tags</div>
+        </li>
+        <li class="p-3 rounded-lg bg-white shadow-sm hover:shadow-md transition cursor-pointer">
+          <div class="font-semibold">Sample Note</div>
+          <div class="text-gray-400 text-xs">#test #linux</div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Note Viewer -->
+    <main class="flex-1 bg-white border rounded-xl shadow-sm px-8 py-6 overflow-y-auto">
+      <div class="space-y-6">
+        <div class="flex justify-between items-start">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              <i data-lucide="file-text" class="w-5 h-5 text-blue-500"></i>
+              Untitled
+            </h1>
+            <div class="flex items-center gap-4 mt-2 text-sm text-gray-500">
+              <div class="flex items-center gap-1">
+                <i data-lucide="folder" class="w-4 h-4"></i>
+                <span>Linux Cmd</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <i data-lucide="calendar" class="w-4 h-4"></i>
+                <span>2025/04/20 下午 9:00</span>
+              </div>
+            </div>
+          </div>
+          <button class="text-sm text-blue-600 hover:bg-blue-50 px-3 py-1 rounded flex items-center gap-1 border border-transparent hover:border-blue-300 transition-all">
+            <i data-lucide="edit-3" class="w-4 h-4 text-blue-500"></i> Edit
+          </button>
+        </div>
+
+        <div class="flex flex-wrap gap-2 text-sm text-blue-700">
+          <span class="bg-blue-100 px-2 py-0.5 rounded-full text-xs">#General</span>
+        </div>
+
+        <hr class="border-gray-200" />
+
+        <article class="prose max-w-none">
+          <p>This is a preview of the note content. You can render HTML content or plain text here.</p>
+        </article>
+      </div>
+    </main>
+
+  </div>
+</div>
+
+  <!-- Style -->
+<style>
+	#contextTooltip {
+	  transition: opacity 0.2s ease;
+	}
+  #noteList li {
+    @apply bg-white rounded-xl border border-gray-200 p-4 shadow-sm transition-all hover:shadow-md hover:border-blue-300 hover:ring hover:ring-blue-100;
+  }
+
+  #noteList li.active {
+    @apply ring-2 ring-blue-300 bg-blue-50;
+  }
+
+  #noteList li .tag {
+    @apply inline-block bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full mr-1;
+  }
+
+  #sectionItems li {
+    @apply flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-gray-700 transition;
+  }
+  #sectionItems li:hover {
+    @apply bg-gray-100;
+  }
+  #sectionItems li.active {
+    @apply bg-blue-100 text-blue-700 font-semibold;
+  }
+  #sectionItems li.dragover {
+    @apply ring-2 ring-blue-400 bg-blue-50;
+  }
+
+  /* 強化 modal loading spinner */
+  #noteEditLoading .spinner {
+    @apply animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent;
+  }
+</style>
+
+  </style>
+<script src="https://unpkg.com/lucide@latest"></script>
+
+
+</body>
+</html>

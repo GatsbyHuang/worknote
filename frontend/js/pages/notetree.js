@@ -4,6 +4,7 @@ let currentCategory = null;
 let currentNotebookId = null;
 let currentRightClickNoteId = null;
 let currentRightClickCategory = null;
+let currentRightClickCategoryName = null;
 let noteTreeReady = false;
 let preview = null;  
 
@@ -119,44 +120,52 @@ async function loadCategories(preloadCategoryId = null, preloadNoteId = null) {
   if (!currentNotebookId) return;
   const res = await fetch(`/api/categories?notebook_id=${currentNotebookId}`);
   const categories = await res.json();
-  const sectionList = document.getElementById('sectionItems');
-  sectionList.innerHTML = '';
 
-  categories.forEach(cat => {
-    const li = document.createElement('li');
-    li.textContent = cat.name;
-    li.dataset.category = cat.id;
-    li.className = 'cursor-pointer hover:bg-blue-100 px-2 py-1 rounded';
-    li.setAttribute('draggable', false);
+	const sectionList = document.getElementById('sectionItems');
+	sectionList.innerHTML = '';
 
-    li.addEventListener('click', () => selectSection(cat.id));
+	categories.forEach(cat => {
+	  const tab = document.createElement('button');
+	  tab.textContent = cat.name;
+	  tab.dataset.category = cat.id;
+	  tab.className =
+		'px-3 py-1 rounded-full text-sm text-gray-700 bg-gray-100 hover:bg-blue-100 hover:text-blue-600 transition whitespace-nowrap';
 
-    li.addEventListener('dragover', e => {
-      e.preventDefault();
-      li.classList.add('dragover');
-    });
-    li.addEventListener('dragleave', () => li.classList.remove('dragover'));
-    li.addEventListener('drop', async e => {
-      e.preventDefault();
-      li.classList.remove('dragover');
-      const noteId = e.dataTransfer.getData('text/plain');
-      if (!noteId) return;
+	  tab.addEventListener('click', () => selectSection(cat.id));
 
-      const res = await fetch(`/api/notes/${noteId}/category`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category_id: cat.id })
-      });
+	  tab.addEventListener('dragover', e => {
+		e.preventDefault();
+		tab.classList.add('ring-2', 'ring-blue-400');
+	  });
 
-      if (res.ok) {
-        console.log(`✅ Note ${noteId} moved to ${cat.name}`);
-        selectSection(cat.id);
-      } else {
-        alert('❌ Failed to move note');
-      }
-    });
+	  tab.addEventListener('dragleave', () => {
+		tab.classList.remove('ring-2', 'ring-blue-400');
+	  });
 
-    sectionList.appendChild(li);
+	  tab.addEventListener('drop', async e => {
+		e.preventDefault();
+		tab.classList.remove('ring-2', 'ring-blue-400');
+
+		const noteId = e.dataTransfer.getData('text/plain');
+		if (!noteId) return;
+
+		const res = await fetch(`/api/notes/${noteId}/category`, {
+		  method: 'PATCH',
+		  headers: { 'Content-Type': 'application/json' },
+		  body: JSON.stringify({ category_id: cat.id })
+		});
+
+		if (res.ok) {
+		  console.log(`✅ Note ${noteId} moved to ${cat.name}`);
+		  selectSection(cat.id);
+		} else {
+		  alert('❌ Failed to move note');
+		}
+	  });
+
+	  sectionList.appendChild(tab);
+
+
   });
 
   if (preloadCategoryId) {
@@ -293,6 +302,7 @@ if (!window.__contextMenuSetupDone__) {
 	  } else if (catEl) {
 		e.preventDefault();
 		currentRightClickCategory = catEl.dataset.category;
+		currentRightClickCategoryName = catEl.textContent.trim();
 		currentRightClickNoteId = null;
 		noteMenu.classList.add('hidden');
 		categoryMenu.classList.remove('hidden');
@@ -353,7 +363,7 @@ document.addEventListener('click', e => {
       return;
     }
 
-    const ok = confirm(`Are you sure you want to delete empty category "${currentRightClickCategory}"?`);
+    const ok = confirm(`Are you sure you want to delete empty category "${currentRightClickCategoryName}"?`);
     if (!ok) return;
 
     const res = await fetch(`/api/categories/${encodeURIComponent(currentRightClickCategory)}`, {
