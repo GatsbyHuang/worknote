@@ -5,88 +5,30 @@ let currentNotebookId = null;
 let currentRightClickNoteId = null;
 let currentRightClickCategory = null;
 let noteTreeReady = false;
+let preview = null;  
 
 export async function init() {
   console.log('🧭 Note Browser Page Loaded');
 
-  // ✅ 從 URL 取得 notebook id
   const params = new URLSearchParams(location.hash.split('?')[1] || '');
   currentNotebookId = params.get('notebook');
   const preloadNoteId = sessionStorage.getItem('currentNoteId');
   const preloadCategoryId = params.get('category');
   
+  await import('./notetree-drag.js').then(m => m.init());
+  preview = await import('./notetree-preview.js');
+
+
   onDocReady();
   await loadCategories(preloadCategoryId, preloadNoteId);
   setupContextMenu();
   setupButtonEvents();
-  
-
-
-
-
 }
 
 function onDocReady(){
-    
       console.log("initi notetree ondocumentready")
       safeLucideRefresh();
-      
-
-      // 拖拉支援（單筆）
-      document.addEventListener('dragstart', (e) => {
-        if (e.target.matches('[data-note-id]')) {
-          const noteId = e.target.dataset.noteId;
-          e.dataTransfer.setData('noteId', noteId);
-        }
-      });
-
-    document.querySelectorAll('#sectionItems').forEach(list => {
-      list.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const targetLi = e.target.closest('li[data-category]');
-        if (targetLi) {
-          targetLi.classList.add('ring-2', 'ring-blue-400', 'bg-blue-50');
-        }
-      });
-
-      list.addEventListener('dragleave', (e) => {
-        const targetLi = e.target.closest('li[data-category]');
-        if (targetLi) {
-          targetLi.classList.remove('ring-2', 'ring-blue-400', 'bg-blue-50');
-        }
-      });
-
-      list.addEventListener('drop', async (e) => {
-        e.preventDefault();
-        const noteId = e.dataTransfer.getData('noteId');
-        const targetLi = e.target.closest('li[data-category]');
-        if (!noteId || !targetLi) return;
-
-        const newCategoryId = targetLi.dataset.category;
-
-        const res = await fetch(`/api/notes/${noteId}/category`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ category_id: newCategoryId })
-        });
-
-        targetLi.classList.remove('ring-2', 'ring-blue-400', 'bg-blue-50');
-
-        if (res.ok) {
-          if (typeof window.selectSection === 'function') {
-            await window.selectSection(newCategoryId);
-          } else if (typeof window.loadCategories === 'function') {
-            await window.loadCategories();
-          }
-        } else {
-          alert('❌ Failed to move note');
-        }
-      });
-    });
-
-
- 
-    
+	  //setupDragDrop();
 }
 
 function safeLucideRefresh() {
@@ -281,85 +223,14 @@ async function selectSection(categoryId, noteToSelect = null) {
   });
   
   if (noteToSelect) {
-	  const match = document.querySelector(`[data-note-id='${noteToSelect}']`);
-	  if (match) {
-		match.scrollIntoView({ behavior: 'smooth', block: 'center' });
-		match.classList.add('bg-blue-100', 'font-semibold', 'ring');
-		const note = await fetchNoteDetail(noteToSelect);
-		renderNoteDetail(note);
-	  }
-	}
+  const match = document.querySelector(`[data-note-id='${noteToSelect}']`);
+  if (match) {
+    match.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    match.classList.add('bg-blue-100', 'font-semibold', 'ring');
+    const note = await fetchNoteDetail(noteToSelect);
+    preview.renderNoteDetail(note);
+  }
 }
-
-function renderNoteDetail(note) {
-		
-	const viewer = document.getElementById('noteViewer');
-	const hint = document.getElementById('noteEmptyHint');
-	viewer.classList.remove('hidden');
-	hint.classList.add('hidden');
-
-	document.getElementById('noteTitle_pre').textContent = note.title || 'Untitled';
-	document.getElementById('noteCategory').textContent = note.category_name || '-';
-	document.getElementById('noteTime').textContent = new Date(note.created_at).toLocaleString();
-
-
-	// Tags
-	const tagsEl = document.getElementById('noteTags');
-	tagsEl.innerHTML = '';
-
-	// ✅ 修正：將字串 tags 解析為陣列
-	let tagList = [];
-	try {
-	  tagList = typeof note.tags === 'string' ? JSON.parse(note.tags) : (note.tags || []);
-	} catch (err) {
-	  console.warn('Invalid tags format:', note.tags);
-	}
-
-	tagList.forEach(tag => {
-	  const span = document.createElement('span');
-	  span.className = 'inline-block bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full';
-	  span.textContent = `#${tag}`;
-	  tagsEl.appendChild(span);
-	});
-
-
-	// Content
-	const contentEl = document.getElementById('noteContent');
-	contentEl.innerHTML = note.content || '';
-
-	lucide.createIcons();
-	
-	document.getElementById('closeEditModalBtn')?.addEventListener('click', () => {
-	  document.getElementById('noteEditModal')?.classList.add('hidden');
-	});
-	
-	document.getElementById('editNoteBtn')?.addEventListener('click', async () => {
-	  lucide.createIcons();
-	  sessionStorage.setItem('currentNoteId', note.id);
-
-	  const modal = document.getElementById('noteEditModal');
-	  const container = document.getElementById('noteEditorContainer');
-	  const loading = document.getElementById('noteEditLoading'); // 👈 loading 層
-
-	  modal.classList.remove('hidden');
-	  loading?.classList.remove('hidden'); // 顯示 loading 動畫
-
-	  try {
-		const html = await fetch('/pages/note-editor.html').then(res => res.text());
-		container.innerHTML = html;
-
-		const module = await import('/js/pages/note-editor.js');
-		await module.init();
-
-	  } catch (err) {
-		console.error('❌ 載入編輯器頁面失敗：', err);
-		container.innerHTML = `<div class="text-red-600 p-4">❌ 無法載入編輯器，請稍後再試。</div>`;
-	  } finally {
-		loading?.classList.add('hidden'); // 無論成功或失敗都隱藏 loading
-	  }
-	});
-
-
 }
 
 
@@ -506,7 +377,7 @@ async function showPrevEditor(note) {
 	const res = await fetch(`/api/notes/${note.id}`);
 	if (!res.ok) throw new Error('Fetch failed');
 	const fullNote = await res.json();
-	renderNoteDetail(fullNote);
+	preview.renderNoteDetail(fullNote);
   } catch (err) {
 	alert('❌ Failed to load note detail.');
 	console.error(err);
