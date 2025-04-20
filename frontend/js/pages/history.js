@@ -76,7 +76,6 @@ async function loadCategories() {
     categoryFilter.appendChild(allOpt);
 
     categories.forEach(cat => {
-	  console.log(categories)
       const opt = document.createElement('option');
       opt.value = cat.id;           // ✅ category_id
       opt.textContent = cat.name;   // ✅ 顯示名稱
