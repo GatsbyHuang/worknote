@@ -8,6 +8,10 @@
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<!-- 加上各種常見格式 fallback -->
+	<link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+	
+
   <style>
   .sidebar-item.active {
     background-color: #DBEAFE; /* Tailwind: bg-blue-100 */
@@ -33,7 +37,9 @@
 
   <!-- Mobile Top Bar -->
   <div class="lg:hidden flex justify-between items-center bg-white px-4 py-2 shadow-md">
-    <div class="text-xl font-bold">🧠 DevNote</div>
+	<div class="flex items-center gap-2">
+	  <img src="/images/logo.png" alt="Logo" class="h-8 w-8">
+	</div>
     <button id="menuToggle" class="text-gray-600 focus:outline-none">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -41,28 +47,34 @@
     </button>
   </div>
 
-  <!-- Desktop Top Bar -->
-  <header class="hidden lg:flex justify-between items-center bg-white px-6 py-2 shadow-sm">
-    <div class="flex items-center gap-4">
-      <!-- Sidebar Toggle Button -->
-      <button id="sidebarToggleBtn" class="text-gray-500 hover:text-blue-500 transition">
-        <svg id="sidebarToggleIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M10 6h10M10 12h10M10 18h10M4 6h.01M4 12h.01M4 18h.01" />
-        </svg>
-      </button>
-      <div class="text-xl font-bold">🧠 DevNote</div>
-    </div>
-    <div class="flex items-center gap-4">
-      <input id='globalSearchBtn' type="text" placeholder="Search..."
-        class="px-3 py-1 border rounded-md w-64 bg-white border-gray-300 focus:ring-1 focus:ring-blue-400" />
-      <div class="relative">
-        <img id="userAvatar" src="https://www.svgrepo.com/show/452030/avatar-default.svg" alt="User"
-          class="w-8 h-8 rounded-full cursor-pointer border" />
-        <div id="userIdLabel" class="absolute right-0 mt-1 text-xs text-right text-gray-500 hidden"></div>
-      </div>
-    </div>
-  </header>
+	<!-- Desktop Top Bar -->
+	<header class="hidden lg:flex justify-between items-center bg-white px-6 py-1.5 shadow-sm">
+	  <div class="flex items-center gap-3">
+		<!-- Sidebar Toggle Button -->
+		<button id="sidebarToggleBtn" class="text-gray-500 hover:text-blue-500 transition">
+		  <svg id="sidebarToggleIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+			  d="M10 6h10M10 12h10M10 18h10M4 6h.01M4 12h.01M4 18h.01" />
+		  </svg>
+		</button>
+
+		<!-- Logo + Text -->
+		<div class="flex items-center gap-2">
+		  <img src="/images/logo.png" alt="Logo" class="h-8 w-8">
+		  <span class="text-lg font-bold text-gray-800">DevNote</span>
+		</div>
+	  </div>
+
+	  <div class="flex items-center gap-4">
+		<input id='globalSearchBtn' type="text" placeholder="Search..."
+		  class="px-3 py-1 border rounded-md w-64 bg-white border-gray-300 focus:ring-1 focus:ring-blue-400 text-sm" />
+		<div class="relative">
+		  <img id="userAvatar" src="https://www.svgrepo.com/show/452030/avatar-default.svg" alt="User"
+			class="w-8 h-8 rounded-full cursor-pointer border" />
+		  <div id="userIdLabel" class="absolute right-0 mt-1 text-xs text-right text-gray-500 hidden"></div>
+		</div>
+	  </div>
+	</header>
 
   <!-- Main Layout -->
   <div class="flex h-[calc(100vh-56px)]">
