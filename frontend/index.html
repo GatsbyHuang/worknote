@@ -226,9 +226,32 @@
 
   console.log('🧪 DOM Loaded');
 
-  Router.onBefore((path) => {
-    console.log('⏳ Loading:', path);
-  });
+	Router.onBefore((path) => {
+	  // 清除 sidebar 所有 active 樣式
+	  document.querySelectorAll('.sidebar-item').forEach(item => {
+		item.classList.remove('active', 'bg-blue-100', 'font-semibold', 'text-blue-700');
+	  });
+	  document.querySelectorAll('[data-notebook-id]').forEach(item => {
+		item.classList.remove('bg-blue-100', 'font-semibold', 'rounded');
+	  });
+
+	  // 套用當前項目的 active 樣式
+	  const basePath = path.split('?')[0];
+	  const query = new URLSearchParams(path.split('?')[1] || '');
+	  const hash = `#${basePath}`;
+
+	  document.querySelector(`.sidebar-item[href="${hash}"]`)
+		?.classList.add('active', 'bg-blue-100', 'font-semibold', 'text-blue-700');
+
+	  const notebookId = query.get('notebook');
+	  if (notebookId) {
+		document.querySelector(`[data-notebook-id="${notebookId}"]`)
+		  ?.classList.add('bg-blue-100', 'font-semibold', 'rounded');
+	  }
+	});
+
+
+
 
   Router.onAfter((path) => {
     console.log('✅ Loaded:', path);

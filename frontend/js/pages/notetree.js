@@ -128,8 +128,11 @@ async function loadCategories(preloadCategoryId = null, preloadNoteId = null) {
 	  const tab = document.createElement('button');
 	  tab.textContent = cat.name;
 	  tab.dataset.category = cat.id;
-	  tab.className =
-		'px-3 py-1 rounded-full text-sm font-medium text-gray-700 bg-gray-100 hover:bg-blue-100 hover:text-blue-600 border border-gray-300 transition whitespace-nowrap';
+		tab.className =
+		  'px-3 py-1 rounded-full text-sm transition whitespace-nowrap border' +
+		  (String(cat.id) === String(currentCategory)
+			? ' bg-blue-100 text-blue-700 border-blue-400 font-semibold ring-1 ring-blue-200'
+			: ' text-gray-700 bg-blue-100 hover:bg-blue-100 hover:text-blue-600 border border-transparent');
 
 	  tab.addEventListener('click', () => {
 		setActiveSection(cat.id);
@@ -183,11 +186,43 @@ async function loadCategories(preloadCategoryId = null, preloadNoteId = null) {
 
 function setActiveSection(categoryId) {
   currentCategory = categoryId;
-  const all = document.querySelectorAll('#sectionItems li');
-  all.forEach(li => li.classList.remove('bg-blue-100', 'text-blue-700', 'font-semibold'));
-  const active = [...all].find(li => li.dataset.category === String(categoryId));
-  if (active) active.classList.add('bg-blue-100', 'text-blue-700', 'font-semibold');
+  const all = document.querySelectorAll('#sectionItems button');
+  all.forEach(btn => {
+    btn.classList.remove(
+      'bg-white',
+      'shadow',
+      'text-blue-700',
+      'border-blue-300',
+      'font-semibold'
+    );
+    btn.classList.add(
+      'text-gray-700',
+      'bg-gray-100',
+      'hover:bg-blue-100',
+      'hover:text-blue-600',
+      'border-transparent'
+    );
+  });
+
+  const active = [...all].find(btn => btn.dataset.category === String(categoryId));
+  if (active) {
+    active.classList.remove(
+      'text-gray-700',
+      'bg-gray-100',
+      'hover:bg-blue-100',
+      'hover:text-blue-600',
+      'border-transparent'
+    );
+    active.classList.add(
+      'bg-white',
+      'shadow',
+      'text-blue-700',
+      'border-blue-300',
+      'font-semibold'
+    );
+  }
 }
+
 
 function setActiveNote(noteId) {
   const all = document.querySelectorAll('#noteList li');

@@ -37,22 +37,17 @@ export function loadNotebookList() {
           <span>${nb.name}</span>
         `;
 
-        a.addEventListener('click', () => {
-          document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
-          const all = document.querySelectorAll('[data-notebook-id]');
-          all.forEach(el => el.classList.remove('bg-blue-100', 'font-semibold', 'rounded'));
-          a.classList.add('bg-blue-100', 'font-semibold', 'rounded');
 
-          sessionStorage.setItem('currentNotebookId', nb.id);
-        });
 
         container.appendChild(a);
       });
 
       lucide.createIcons();
 
+
+
       const hash = window.location.hash;
-      const match = hash.match(/notebook=(\d+)/) || [null, sessionStorage.getItem('currentNotebookId')];
+      const match = hash.match(/notebook=(\d+)/) ;
       if (match) {
         const activeId = match[1];
         const all = document.querySelectorAll('[data-notebook-id]');
@@ -64,6 +59,8 @@ export function loadNotebookList() {
       }
     });
 }
+
+
 
 export function NotebookMenu() {
   let currentRightClickNotebookId = null;
