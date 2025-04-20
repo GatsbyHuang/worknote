@@ -109,10 +109,13 @@ const Router = {
       document.getElementById('sidebar')?.classList.toggle('hidden');
     });
 
-    window.addEventListener('popstate', () => {
-      const path = location.hash?.slice(1) || 'dashboard';
-      this.loadPage(path);
-    });
+	const load = () => {
+	  const path = location.hash?.slice(1) || 'dashboard';
+	  this.loadPage(path);
+	};
+
+	window.addEventListener('hashchange', load);
+	window.addEventListener('popstate', load);
   }
 };
 

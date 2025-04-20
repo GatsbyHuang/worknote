@@ -1,23 +1,27 @@
 // notebook.js
-
+import { bindOnce } from './utils.js';
 
 export function initNoteBookHandler() {
-	  document.getElementById('addNotebookBtn')?.addEventListener('click', async () => {
-	  const name = prompt('Enter new notebook name:');
-	  if (!name) return;
-	  const res = await fetch('/api/notebooks', {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ name })
-	  });
-	  if (res.ok) {
-		//location.reload(); // 或觸發重新 render notebook list
-		loadNotebookList()
-	  } else {
-		alert('❌ Failed to create notebook');
-	  }
-	});
+  const addBtn = document.getElementById('addNotebookBtn');
+  bindOnce(addBtn, 'click', async () => {
+    const name = prompt('Enter new notebook name:');
+    if (!name) return;
+
+    const res = await fetch('/api/notebooks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    });
+
+    if (res.ok) {
+      loadNotebookList();
+    } else {
+      alert('❌ Failed to create notebook');
+    }
+  });
 }
+
+
 
 // 🔄 動態載入 Notebook 清單
 export function loadNotebookList() {
@@ -84,28 +88,29 @@ export function NotebookMenu() {
     document.getElementById('notebookContextMenu')?.classList.add('hidden');
   });
 
-  document.getElementById('cancelNotebookContext')?.addEventListener('click', () => {
-    document.getElementById('notebookContextMenu')?.classList.add('hidden');
-  });
+	bindOnce(document.getElementById('cancelNotebookContext'), 'click', () => {
+	  document.getElementById('notebookContextMenu')?.classList.add('hidden');
+	});
 
-  document.getElementById('deleteNotebookOption')?.addEventListener('click', async () => {
-    if (!currentRightClickNotebookId) return;
-    const confirmDelete = confirm('Are you sure you want to delete this notebook? All its categories and notes will be removed.');
-    if (!confirmDelete) return;
 
-    const res = await fetch(`/api/notebooks/${currentRightClickNotebookId}`, { method: 'DELETE' });
-    if (res.ok) {
-      alert('✅ Notebook deleted.');
-      currentRightClickNotebookId = null;
-      document.getElementById('notebookContextMenu').classList.add('hidden');
-      loadNotebookList();
-    } else {
-      const result = await res.json();
-      alert(`❌ 刪除失敗：${result.error || 'Unknown error'}`);
-    }
-  });
+	bindOnce(document.getElementById('deleteNotebookOption'), 'click', async () => {
+	  if (!currentRightClickNotebookId) return;
+	  const confirmDelete = confirm('Are you sure you want to delete this notebook? All its categories and notes will be removed.');
+	  if (!confirmDelete) return;
 
-  document.getElementById('renameNotebookOption')?.addEventListener('click', async () => {
+	  const res = await fetch(`/api/notebooks/${currentRightClickNotebookId}`, { method: 'DELETE' });
+	  if (res.ok) {
+		alert('✅ Notebook deleted.');
+		currentRightClickNotebookId = null;
+		document.getElementById('notebookContextMenu').classList.add('hidden');
+		loadNotebookList();
+	  } else {
+		const result = await res.json();
+		alert(`❌ 刪除失敗：${result.error || 'Unknown error'}`);
+	  }
+	});
+
+   bindOnce(document.getElementById('renameNotebookOption'), 'click', async () => {
     if (!currentRightClickNotebookId) return;
     const newName = prompt('Enter new notebook name:');
     if (!newName?.trim()) return;

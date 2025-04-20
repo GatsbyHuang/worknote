@@ -1,4 +1,5 @@
 // notetree.js - for note-browser.html
+import { bindOnce } from './utils.js';
 
 let currentCategory = null;
 let currentNotebookId = null;
@@ -27,7 +28,7 @@ export async function init() {
 }
 
 function onDocReady(){
-      console.log("initi notetree ondocumentready")
+      console.log("initi notetree ondocument ready")
       safeLucideRefresh();
 	  //setupDragDrop();
 }
@@ -315,8 +316,6 @@ function setupContextMenu() {
   const categoryMenu = document.getElementById('categoryMenu');
   const deleteCategoryOption = document.getElementById('deleteCategoryOption');
 
-if (!window.__contextMenuSetupDone__) {
-	
 	
 	document.addEventListener('contextmenu', e => {
 	  const contextMenu = document.getElementById('contextMenu');
@@ -356,23 +355,25 @@ if (!window.__contextMenuSetupDone__) {
 	});
 
 
-document.addEventListener('click', e => {
-  const contextMenu = document.getElementById('contextMenu');
-  if (!contextMenu) return; // ⛑ 若切到其它頁面沒有 contextMenu，避免報錯
+	document.addEventListener('click', e => {
+	  const contextMenu = document.getElementById('contextMenu');
+	  if (!contextMenu) return; // ⛑ 若切到其它頁面沒有 contextMenu，避免報錯
 
-  if (!e.target.closest('#contextMenu')) {
-    contextMenu.classList.add('hidden');
-  }
-});
+	  if (!e.target.closest('#contextMenu')) {
+		contextMenu.classList.add('hidden');
+	  }
+	});
+ 
+	  // ✅ 用 bindOnce 保護所有 menu 內部的 click
+	  bindOnce(document.getElementById('cancelContext'), 'click', () => {
+		document.getElementById('contextMenu')?.classList.add('hidden');
+	  });
 
-  document.getElementById('cancelContext')?.addEventListener('click', () => {
-    contextMenu.classList.add('hidden');
-  });
-  document.getElementById('cancelCategoryContext')?.addEventListener('click', () => {
-    contextMenu.classList.add('hidden');
-  });
+	  bindOnce(document.getElementById('cancelCategoryContext'), 'click', () => {
+		document.getElementById('contextMenu')?.classList.add('hidden');
+	  });
 
-  deleteNoteOption?.addEventListener('click', async () => {
+  bindOnce(document.getElementById('deleteNoteOption'), 'click', async () => {
     if (!currentRightClickNoteId) return;
     if (!confirm('Are you sure you want to delete this note?')) return;
 
@@ -388,7 +389,7 @@ document.addEventListener('click', e => {
     }
   });
 
-  deleteCategoryOption?.addEventListener('click', async () => {
+  bindOnce(document.getElementById('deleteCategoryOption'), 'click', async () => {
 	
     if (!currentRightClickCategory) return;
 
@@ -416,8 +417,7 @@ document.addEventListener('click', e => {
     }
   });
 	
-  window.__contextMenuSetupDone__ = true; // 🔒 記得只設一次
-}
+
 }
 
 async function showPrevEditor(note) {

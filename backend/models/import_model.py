@@ -43,25 +43,36 @@ def merge_notes_from_db(import_db_path, strategy='ignore'):
     with conn:
         # 匯入 notebooks（以 name 為唯一 key）
         for nb in imported_notebooks:
-            try:
-                conn.execute('INSERT OR IGNORE INTO notebooks (id, name) VALUES (?, ?)', (nb['id'], nb['name']))
+            row = conn.execute('SELECT id FROM notebooks WHERE name = ?', (nb['name'],)).fetchone()
+            if row:
+                nb_id = row['id']
+            else:
+                cur = conn.execute('INSERT INTO notebooks (name) VALUES (?)', (nb['name'],))
+                nb_id = cur.lastrowid
                 notebooks_merged += 1
-            except:
-                pass
+            nb['resolved_id'] = nb_id
 
         # 匯入 categories（根據 name + notebook_id 唯一）
         for cat in imported_categories:
-            try:
-                conn.execute('''
-                    INSERT OR IGNORE INTO categories (id, name, notebook_id)
-                    VALUES (?, ?, ?)
-                ''', (cat['id'], cat['name'], cat.get('notebook_id')))
+            nb_id = next((nb['resolved_id'] for nb in imported_notebooks if nb['id'] == cat.get('notebook_id')), None)
+            if nb_id is None:
+                continue
+
+            row = conn.execute('SELECT id FROM categories WHERE name = ? AND notebook_id = ?', (cat['name'], nb_id)).fetchone()
+            if row:
+                cat_id = row['id']
+            else:
+                cur = conn.execute('INSERT INTO categories (name, notebook_id) VALUES (?, ?)', (cat['name'], nb_id))
+                cat_id = cur.lastrowid
                 categories_merged += 1
-            except:
-                pass
+            cat['resolved_id'] = cat_id
 
         # 匯入 notes（根據 strategy 決定）
         for note in imported_notes:
+            cat_id = next((cat['resolved_id'] for cat in imported_categories if cat['id'] == note.get('category_id')), None)
+            if cat_id is None:
+                continue
+
             if strategy == 'ignore':
                 try:
                     conn.execute('''
@@ -69,7 +80,7 @@ def merge_notes_from_db(import_db_path, strategy='ignore'):
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     ''', (
                         note['id'], note['title'], note['content'], note['tags'],
-                        note['category_id'], note['created_at'], note['userid'], note['archived']
+                        cat_id, note['created_at'], note['userid'], note['archived']
                     ))
                     notes_merged += 1
                 except:
@@ -82,7 +93,7 @@ def merge_notes_from_db(import_db_path, strategy='ignore'):
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     note['id'], note['title'], note['content'], note['tags'],
-                    note['category_id'], note['created_at'], note['userid'], note['archived']
+                    cat_id, note['created_at'], note['userid'], note['archived']
                 ))
                 notes_merged += 1
 
@@ -91,3 +102,4 @@ def merge_notes_from_db(import_db_path, strategy='ignore'):
         'categories_merged': categories_merged,
         'notebooks_merged': notebooks_merged
     }
+

@@ -1,5 +1,7 @@
 // note-preview.js - 控制右側預覽筆記區塊
 
+import { bindOnce } from './utils.js'; 
+
 export function init() {
   console.log('[👁️] note-preview 模組就緒');
 }
@@ -60,11 +62,12 @@ export function renderNoteDetail(note) {
 
 	lucide.createIcons();
 	
-	document.getElementById('closeEditModalBtn')?.addEventListener('click', () => {
+	bindOnce(document.getElementById('closeEditModalBtn'), 'click', () => {
 	  document.getElementById('noteEditModal')?.classList.add('hidden');
 	});
 	
-	document.getElementById('editNoteBtn')?.addEventListener('click', async () => {
+	bindOnce(document.getElementById('editNoteBtn'), 'click', async () => {
+	  console.log("click editNoteBtn")
 	  lucide.createIcons();
 	  sessionStorage.setItem('currentNoteId', note.id);
 
