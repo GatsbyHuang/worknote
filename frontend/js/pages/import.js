@@ -14,6 +14,11 @@ export async function init() {
   const categoryCountEl = document.getElementById('categoryCount');
   const conflictCountEl = document.getElementById('conflictCount');
 
+
+  // ✅ 防止重複綁定事件
+  if (window.__importEventBound__) return;
+  window.__importEventBound__ = true;
+
   dbInput.addEventListener('change', () => {
     analyzeBtn.disabled = !dbInput.files.length;
   });
@@ -59,6 +64,8 @@ export async function init() {
 		alert('❌ Please select a file first.');
 		return;
 	  }
+	  
+	  analyzeBtn.disabled = !dbInput.files.length;
 
 	  const strategy = document.querySelector('input[name="conflictStrategy"]:checked')?.value || 'ignore';
 

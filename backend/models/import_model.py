@@ -1,5 +1,7 @@
 import sqlite3
 from db import get_db
+from datetime import datetime
+
 
 def analyze_notes_and_categories(import_db_path):
     # 連接到匯入的 .db
@@ -43,9 +45,11 @@ def merge_notes_from_db(import_db_path, strategy='ignore'):
     with conn:
         # 匯入 notebooks（以 name 為唯一 key）
         for nb in imported_notebooks:
+            print(nb)
             row = conn.execute('SELECT id FROM notebooks WHERE name = ?', (nb['name'],)).fetchone()
             if row:
                 nb_id = row['id']
+                print(f"detect the same notebook_name: {nb['name']} use current nb_id:{nb_id}")
             else:
                 cur = conn.execute('INSERT INTO notebooks (name) VALUES (?)', (nb['name'],))
                 nb_id = cur.lastrowid
@@ -54,6 +58,7 @@ def merge_notes_from_db(import_db_path, strategy='ignore'):
             print(f"Notebook resolved_id : {nb_id}")
         # 匯入 categories（根據 name + notebook_id 唯一）
         for cat in imported_categories:
+            print(cat)
             nb_id = next((nb['resolved_id'] for nb in imported_notebooks if nb['id'] == cat.get('notebook_id')), None)
             if nb_id is None:
                 continue
@@ -61,6 +66,7 @@ def merge_notes_from_db(import_db_path, strategy='ignore'):
             row = conn.execute('SELECT id FROM categories WHERE name = ? AND notebook_id = ?', (cat['name'], nb_id)).fetchone()
             if row:
                 cat_id = row['id']
+                print(f"detect the same category in this notebook, use current cat_id:{cat_id}")
             else:
                 cur = conn.execute('INSERT INTO categories (name, notebook_id) VALUES (?, ?)', (cat['name'], nb_id))
                 cat_id = cur.lastrowid
@@ -77,11 +83,18 @@ def merge_notes_from_db(import_db_path, strategy='ignore'):
             if strategy == 'ignore':
                 try:
                     conn.execute('''
-                        INSERT INTO notes (id, title, content, tags, category_id, created_at, userid, archived)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO notes (id, title, content, tags, category_id, created_at, updated_at, userid, archived)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ''', (
-                        note['id'], note['title'], note['content'], note['tags'],
-                        cat_id, note['created_at'], note['userid'], note['archived']
+                        note['id'],
+                        note['title'],
+                        note['content'],
+                        note['tags'],
+                        cat_id,
+                        note.get('created_at'),
+                        note.get('updated_at') or datetime.now().isoformat(),
+                        note.get('userid'),
+                        note.get('archived', 0)
                     ))
                     notes_merged += 1
                 except:
@@ -90,13 +103,21 @@ def merge_notes_from_db(import_db_path, strategy='ignore'):
             elif strategy == 'overwrite':
                 conn.execute('DELETE FROM notes WHERE id = ?', (note['id'],))
                 conn.execute('''
-                    INSERT INTO notes (id, title, content, tags, category_id, created_at, userid, archived)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO notes (id, title, content, tags, category_id, created_at, updated_at, userid, archived)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
-                    note['id'], note['title'], note['content'], note['tags'],
-                    cat_id, note['created_at'], note['userid'], note['archived']
+                    note['id'],
+                    note['title'],
+                    note['content'],
+                    note['tags'],
+                    cat_id,
+                    note.get('created_at'),
+                    note.get('updated_at') or datetime.now().isoformat(),
+                    note.get('userid'),
+                    note.get('archived', 0)
                 ))
                 notes_merged += 1
+
 
     return {
         'notes_merged': notes_merged,

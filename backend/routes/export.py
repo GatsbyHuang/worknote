@@ -20,10 +20,10 @@ def execute_export():
     notes = query_notes_by_conditions(
         data['tags'], data['categories'], data['userids'], data['notebooks'], data['mode']
     )
-
+    print(f"total export notes : {len(notes)}")
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     export_db_path = Path(f'notes_export{timestamp}.db')
-    init_db(export_db_path)
+    init_db(export_db_path, with_defaults=False)
 
     conn = get_db(export_db_path)
     main_conn = get_db()  # 原始主資料庫
@@ -40,39 +40,48 @@ def execute_export():
                 note['userid'], note['archived']
             ))
 
-        # ✅ 匯出對應的 categories
+        # ✅ 1. 找出所有 category_id → 推出 notebook_id
         category_ids = {note['category_id'] for note in notes if note['category_id']}
-        if category_ids:
-            q = f"SELECT id, name, notebook_id FROM categories WHERE id IN ({','.join(['?'] * len(category_ids))})"
-            rows = main_conn.execute(q, list(category_ids)).fetchall()
+        print(f"category_ids:{category_ids}")
+
+        if not category_ids:
+            main_conn.close()
+            return jsonify({'message': 'No categories to export', 'filename': export_db_path.name})
+
+        q1 = f'''
+            SELECT DISTINCT c.id, c.name, c.notebook_id
+            FROM categories c
+            WHERE c.id IN ({','.join(['?'] * len(category_ids))})
+        '''
+        category_rows = main_conn.execute(q1, list(category_ids)).fetchall()
+        notebook_ids = {row['notebook_id'] for row in category_rows}
+        print(f"category_rows={len(category_rows)}")
+        print(f"notebook_ids={notebook_ids}")
+
+        # ✅ 2. 匯出這些 notebooks
+        if notebook_ids:
+            nq = f"SELECT id, name FROM notebooks WHERE id IN ({','.join(['?'] * len(notebook_ids))})"
+            notebook_rows = main_conn.execute(nq, list(notebook_ids)).fetchall()
             conn.executemany(
-                'INSERT OR IGNORE INTO categories (id, name, notebook_id) VALUES (?, ?, ?)',
-                [(row['id'], row['name'], row['notebook_id']) for row in rows]
+                'INSERT OR IGNORE INTO notebooks (id, name) VALUES (?, ?)',
+                [(row['id'], row['name']) for row in notebook_rows]
             )
 
-        # ✅ 匯出對應的 categories（保持原本邏輯）
-        category_ids = {note['category_id'] for note in notes if note['category_id']}
-        if category_ids:
-            q = f"SELECT id, name, notebook_id FROM categories WHERE id IN ({','.join(['?'] * len(category_ids))})"
-            category_rows = main_conn.execute(q, list(category_ids)).fetchall()
+        # ✅ 3. 匯出這些 notebooks 之下的所有 categories（正確！）
+        if notebook_ids:
+            q2 = f'''
+                SELECT id, name, notebook_id FROM categories
+                WHERE notebook_id IN ({','.join(['?'] * len(notebook_ids))})
+            '''
+            cat_rows = main_conn.execute(q2, list(notebook_ids)).fetchall()
             conn.executemany(
                 'INSERT OR IGNORE INTO categories (id, name, notebook_id) VALUES (?, ?, ?)',
-                [(row['id'], row['name'], row['notebook_id']) for row in category_rows]
+                [(row['id'], row['name'], row['notebook_id']) for row in cat_rows]
             )
-
-            # ✅ 從 category rows 中取出 notebook_id 再查 notebooks
-            notebook_ids = {row['notebook_id'] for row in category_rows if row['notebook_id']}
-            if notebook_ids:
-                nq = f"SELECT id, name FROM notebooks WHERE id IN ({','.join(['?'] * len(notebook_ids))})"
-                notebook_rows = main_conn.execute(nq, list(notebook_ids)).fetchall()
-                conn.executemany(
-                    'INSERT OR IGNORE INTO notebooks (id, name) VALUES (?, ?)',
-                    [(row['id'], row['name']) for row in notebook_rows]
-                )
-
 
     main_conn.close()
     return jsonify({'message': 'Export success', 'filename': export_db_path.name})
+
 
 
 @export_bp.route('/users')

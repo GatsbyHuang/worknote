@@ -1,6 +1,6 @@
 from flask import Flask, send_from_directory
 from flask_cors import CORS
-from db import init_db, DEFAULT_DB_PATH  # 直接引入 init_db 和預設路徑
+from db import init_db, auto_fix_columns, get_db, DEFAULT_DB_PATH
 import os
 from routes.notes import notes_bp
 from routes.tags import tags_bp
@@ -15,8 +15,13 @@ from routes.version import version_bp
 app = Flask(__name__, static_folder='../frontend', static_url_path='/')
 CORS(app)
 
-if not DEFAULT_DB_PATH.exists():
-    init_db()
+#if not DEFAULT_DB_PATH.exists():
+init_db() #只會「建立不存在的資料表」，不會刪除或覆蓋
+
+# 再補欄位（必要時才會生效）
+conn = get_db()
+auto_fix_columns(conn)
+conn.close()
 
 # 註冊 API blueprint
 app.register_blueprint(notes_bp, url_prefix='/api/notes')

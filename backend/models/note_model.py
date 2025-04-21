@@ -71,10 +71,19 @@ def create_note(data, userid):
     with conn:
         conn.execute(
             '''
-            INSERT INTO notes (id, title, content, tags, category_id, created_at, archived, userid)
-            VALUES (?, ?, ?, ?, ?, ?, 0, ?)
+            INSERT INTO notes (id, title, content, tags, category_id, created_at, updated_at, archived, userid)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?)
             ''',
-            (note_id, data['title'], data['content'], json.dumps(tags), data['category_id'], data['created_at'], userid)
+            (
+                note_id,
+                data['title'],
+                data['content'],
+                json.dumps(tags),
+                data['category_id'],
+                data['created_at'],
+                data['created_at'],  # 初始 updated_at = created_at
+                userid
+            )
         )
     return note_id
 
@@ -86,7 +95,11 @@ def update_note(note_id, data):
     conn = get_db()
     with conn:
         result = conn.execute(
-            "UPDATE notes SET title=?, content=?, tags=?, category_id=? WHERE id=?",
+            '''
+            UPDATE notes 
+            SET title=?, content=?, tags=?, category_id=?, updated_at=CURRENT_TIMESTAMP 
+            WHERE id=?
+            ''',
             (
                 data['title'],
                 data['content'],
@@ -96,6 +109,7 @@ def update_note(note_id, data):
             )
         )
         return result.rowcount > 0
+
 
 
 def update_note_category(note_id, category_id):

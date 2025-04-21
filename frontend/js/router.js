@@ -20,6 +20,8 @@ const Router = {
     try {
       // 🔄 Loading indicator
       this.showLoading();
+	  this.disableMenuItems(true);  // 🚫 點下就馬上鎖按鈕
+
 
       // 🔸 Global before hooks
       for (const hook of this.beforeHooks) await hook(path);
@@ -35,9 +37,10 @@ const Router = {
       // 📦 Try load module
       let module = null;
       try {
+		console.log(basePath)
         module = await import(`./pages/${basePath}.js`);
       } catch (modErr) {
-        console.warn(`[router] 無 JS 模組對應：${basePath}`);
+		console.warn(`[router] 無 JS 模組對應：${basePath}`, modErr);
       }
 
       // 🔸 Module before hook
@@ -64,6 +67,8 @@ const Router = {
       } catch (_) {}
     } finally {
       this.hideLoading();
+	  this.disableMenuItems(false); // ✅ 載入完成才還原
+
     }
   },
 
@@ -88,7 +93,16 @@ const Router = {
     const el = document.getElementById('pageLoading');
     if (el) el.classList.add('hidden');
   },
+  
+  disableMenuItems(disabled = true) {
+	document.querySelectorAll('.sidebar-item').forEach(btn => {
+		btn.classList.toggle('opacity-50', disabled);
+		btn.classList.toggle('cursor-not-allowed', disabled);
+		btn.style.pointerEvents = disabled ? 'none' : 'auto';
+	  });
+},
 
+  
   init() {
     const defaultPath = location.hash?.slice(1) || 'dashboard';
     this.loadPage(defaultPath);
