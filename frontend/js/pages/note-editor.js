@@ -190,7 +190,6 @@ export async function init() {
       const res = await fetch(`/api/notes/${noteId}`);
       const note = await res.json();
       console.log('[📌] Current Note:', note);
-	  console.log(document.getElementById('noteTitle'))
       document.getElementById('noteTitle').value = note.title || '';
       tinymce.get('editor').setContent(note.content || '');
 
@@ -248,8 +247,8 @@ export async function init() {
 
     if (res.ok) {
       alert('✅ Note saved successfully!');
-      sessionStorage.removeItem('currentNoteId');
-      window.location.hash = `#notetree?notebook=${notebookId}`;
+	  sessionStorage.setItem('currentNoteId', noteId);
+      window.location.hash = `#notetree?notebook=${notebookId}&category=${category}`;
       window.dispatchEvent(new Event('popstate'));
     } else {
       alert('❌ Failed to save the note.');

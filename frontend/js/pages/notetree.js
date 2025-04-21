@@ -16,7 +16,7 @@ export async function init() {
   currentNotebookId = params.get('notebook');
   const preloadNoteId = sessionStorage.getItem('currentNoteId');
   const preloadCategoryId = params.get('category');
-  
+   console.log('preloadNoteId:', preloadNoteId);
   await import('./notetree-drag.js').then(m => m.init());
   preview = await import('./notetree-preview.js');
 
@@ -252,6 +252,7 @@ async function selectSection(categoryId, noteToSelect = null) {
     });
 
 	li.addEventListener('click', async () => {
+	  sessionStorage.setItem('currentNoteId', note.id);
       setActiveNote(note.id);
       //showEditor(note);
 	  showPrevEditor(note);
@@ -270,15 +271,17 @@ async function selectSection(categoryId, noteToSelect = null) {
     noteList.appendChild(li);
   });
   
-  if (noteToSelect) {
-  const match = document.querySelector(`[data-note-id='${noteToSelect}']`);
-  if (match) {
-    match.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    match.classList.add('bg-blue-100', 'font-semibold', 'ring');
-    const note = await fetchNoteDetail(noteToSelect);
-    preview.renderNoteDetail(note);
-  }
-}
+	const activeNoteId = noteToSelect || sessionStorage.getItem('currentNoteId');
+	if (activeNoteId) {
+	  const match = document.querySelector(`[data-note-id='${activeNoteId}']`);
+	  if (match) {
+		match.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		match.classList.add('bg-blue-100', 'font-semibold', 'ring');
+		const note = await fetchNoteDetail(activeNoteId);
+		preview.renderNoteDetail(note);
+	  }
+	}
+
 }
 
 
