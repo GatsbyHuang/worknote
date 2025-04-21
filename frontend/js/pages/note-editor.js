@@ -1,4 +1,7 @@
 import Fuse from 'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.esm.min.js';
+import { bindOnce } from './utils.js';
+
+let isEdit = false; 
 
 function runWhenIdleOrLater(callback) {
   if ('requestIdleCallback' in window) {
@@ -74,8 +77,17 @@ export async function init() {
       { text: 'Shell', value: 'bash' },
       { text: 'SQL', value: 'sql' }
     ],
-    codesample_content_css: 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css'
+    codesample_content_css: 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css',
+	
+	  
+    setup(editor) {
+      editor.on('Change Input Undo Redo', () => {
+        isEdit = true;
+      });
+    }
+	
   });
+  
 
   await loadCategories();
 
@@ -159,8 +171,80 @@ export async function init() {
       e.preventDefault();
       addTag(tagInput.value.trim());
       tagInput.value = '';
+	  isEdit = true;
     }
   });
+  
+    bindOnce(document.getElementById('noteTitle'), 'input', () => {
+	  isEdit = true;
+
+	});
+
+	bindOnce(document.getElementById('notebookSelect'), 'change', () => {
+	  isEdit = true;
+	});
+
+	bindOnce(document.getElementById('categorySelect'), 'change', () => {
+	  isEdit = true;
+	});
+
+
+function startAutoSave() {
+  //auto saved after content changed over 1 mins
+  if (window.__autoSaveStarted__) return;
+  window.__autoSaveStarted__ = true;
+
+  setInterval(async () => {
+    if (!isEdit) return;
+
+    const userid = localStorage.getItem('userId');
+    const notebookId = document.getElementById('notebookSelect').value;
+    const title = document.getElementById('noteTitle').value.trim();
+    const category = document.getElementById('categorySelect').value.trim();
+    const content = tinymce.get('editor').getContent();
+    const tags = Array.from(document.querySelectorAll('#tagContainer span'))
+      .map(el => el.firstChild?.nodeValue?.trim())
+      .filter(Boolean);
+
+    if (!title || !content || !category || tags.length === 0) return;
+
+    const payload = {
+      title,
+      content,
+      tags,
+      category_id: category,
+      created_at: new Date().toISOString(),
+      userid
+    };
+
+    const noteId = sessionStorage.getItem('currentNoteId');
+    const res = await fetch(noteId ? `/api/notes/${noteId}` : '/api/notes', {
+      method: noteId ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      isEdit = false;
+	  console.log("auto saved.")
+      showAutoSaveMask();
+    }
+  }, 10000);
+}
+
+startAutoSave();
+
+function showAutoSaveMask() {
+	const notice = document.getElementById('autoSaveNotice');
+	notice.classList.remove('hidden');
+	notice.style.opacity = '1';
+	setTimeout(() => {
+	  notice.style.opacity = '0';
+	  setTimeout(() => notice.classList.add('hidden'), 500);
+	}, 2000);
+}
+
+
 
   async function loadTagSuggestions() {
     try {
