@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from pathlib import Path
 from datetime import datetime
 from db import init_db, get_db
+import json
 from models.export_model import (
     query_notes_by_conditions,get_distinct_userids
 )
@@ -84,6 +85,56 @@ def execute_export():
 
 
 
+@export_bp.route('/export_full', methods=['GET'])
+def export_full_notebooks():
+    db = get_db()
+
+    notebooks = db.execute('SELECT id, name FROM notebooks').fetchall()
+    result = []
+
+    for nb in notebooks:
+        nb_id = nb['id']
+
+        # Categories under this notebook
+        categories = db.execute("""
+            SELECT id, name FROM categories WHERE notebook_id = ?
+        """, (nb_id,)).fetchall()
+        category_ids = [row['id'] for row in categories]
+
+        notes = []
+        if category_ids:
+            placeholders = ','.join('?' for _ in category_ids)
+            notes = db.execute(f"""
+                SELECT tags, userid FROM notes
+                WHERE category_id IN ({placeholders})
+            """, category_ids).fetchall()
+
+        # Aggregate unique tags and userids
+        tag_set = set()
+        user_set = set()
+
+        for note in notes:
+            try:
+                tags = json.loads(note['tags']) if note['tags'] else []
+                if isinstance(tags, list):
+                    tag_set.update([t.strip() for t in tags if isinstance(t, str)])
+            except json.JSONDecodeError:
+                pass  # 忽略不合法的格式
+            tag_set.update(tags)
+            if note['userid']:
+                user_set.add(note['userid'])
+
+        result.append({
+            'id': nb_id,
+            'name': nb['name'],
+            'categories': [dict(row) for row in categories],
+            'tags': [{'name': tag} for tag in sorted(tag_set)],
+            'users': [{'id': uid, 'name': uid} for uid in sorted(user_set)]
+        })
+
+    return jsonify(result)
+    
+    
 @export_bp.route('/users')
 def list_userids():
     return jsonify(get_distinct_userids())
