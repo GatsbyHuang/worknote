@@ -62,7 +62,7 @@ export async function init() {
   await tinymce.init({
     selector: '#editor',
     plugins: 'code codesample link image lists fullscreen table ',
-    toolbar: 'undo redo | table | formatselect | bold italic | alignleft aligncenter alignright | forecolor backcolor |bullist numlist | codesample | link image | code | fullscreen',
+    toolbar: 'undo redo | table | formatselect | bold italic | alignleft aligncenter alignright | outdent indent | forecolor backcolor |bullist numlist | codesample | link image | code | fullscreen',
     table_toolbar: "tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol",
     height: 500,
     branding: false,
