@@ -2,6 +2,8 @@
 
 import { bindOnce } from './utils.js'; 
 
+let currentNote = null;
+
 export function init() {
   console.log('[👁️] note-preview 模組就緒');
 }
@@ -26,6 +28,8 @@ export function hideLoadingSpinner() {
 
  
 export function renderNoteDetail(note) {
+	currentNote = note;
+
 	const viewer = document.getElementById('noteViewer');
 	const hint = document.getElementById('noteEmptyHint');
 	viewer.classList.remove('hidden');
@@ -66,32 +70,36 @@ export function renderNoteDetail(note) {
 	  document.getElementById('noteEditModal')?.classList.add('hidden');
 	});
 	
-	bindOnce(document.getElementById('editNoteBtn'), 'click', async () => {
-	  console.log("click editNoteBtn")
-	  lucide.createIcons();
-	  sessionStorage.setItem('currentNoteId', note.id);
+	bindOnce(document.getElementById('editNoteBtn'), 'click', openEditorModal);
 
-	  const modal = document.getElementById('noteEditModal');
-	  const container = document.getElementById('noteEditorContainer');
-	  const loading = document.getElementById('noteEditLoading'); // 👈 loading 層
+	
+}
 
-	  modal.classList.remove('hidden');
-	  loading?.classList.remove('hidden'); // 顯示 loading 動畫
+async function openEditorModal() {
+  if (!currentNote) return;
 
-	  try {
-		const html = await fetch('/pages/note-editor.html').then(res => res.text());
-		container.innerHTML = html;
+  console.log("click editNoteBtn");
+  lucide.createIcons();
+  sessionStorage.setItem('currentNoteId', currentNote.id);
 
-		const module = await import('/js/pages/note-editor.js');
-		await module.init();
+  const modal = document.getElementById('noteEditModal');
+  const container = document.getElementById('noteEditorContainer');
+  const loading = document.getElementById('noteEditLoading');
 
-	  } catch (err) {
-		console.error('❌ 載入編輯器頁面失敗：', err);
-		container.innerHTML = `<div class="text-red-600 p-4">❌ 無法載入編輯器，請稍後再試。</div>`;
-	  } finally {
-		loading?.classList.add('hidden'); // 無論成功或失敗都隱藏 loading
-	  }
-	});
+  modal.classList.remove('hidden');
+  loading?.classList.remove('hidden');
 
+  try {
+    const html = await fetch('/pages/note-editor.html').then(res => res.text());
+    container.innerHTML = html;
 
+    const module = await import('/js/pages/note-editor.js');
+    await module.init();
+
+  } catch (err) {
+    console.error('❌ 載入編輯器頁面失敗：', err);
+    container.innerHTML = `<div class="text-red-600 p-4">❌ 無法載入編輯器，請稍後再試。</div>`;
+  } finally {
+    loading?.classList.add('hidden');
+  }
 }
