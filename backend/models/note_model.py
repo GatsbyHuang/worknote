@@ -60,8 +60,12 @@ def get_note_by_id(note_id):
 
 
 def create_note(data, userid):
-    print("\U0001f9ea [DEBUG] 接收到 tags:", data.get('tags'))
-    print("\U0001f9ea [DEBUG] 寫入 tags（JSON 字串）:", json.dumps(data.get('tags')))
+    print("🧪 [DEBUG] 接收到 tags:", data.get('tags'))
+
+    # ➤ 將所有 tags 轉成小寫
+    tags = [t.lower() for t in (data.get('tags') or [])]
+    print("🧪 [DEBUG] 寫入 tags（小寫）:", tags)
+
     conn = get_db()
     note_id = str(uuid.uuid4())
     with conn:
@@ -70,11 +74,15 @@ def create_note(data, userid):
             INSERT INTO notes (id, title, content, tags, category_id, created_at, archived, userid)
             VALUES (?, ?, ?, ?, ?, ?, 0, ?)
             ''',
-            (note_id, data['title'], data['content'], json.dumps(data['tags']), data['category_id'], data['created_at'], userid)
+            (note_id, data['title'], data['content'], json.dumps(tags), data['category_id'], data['created_at'], userid)
         )
     return note_id
 
+
 def update_note(note_id, data):
+    # ➤ 將所有 tags 轉成小寫
+    tags = [t.lower() for t in (data.get('tags') or [])]
+
     conn = get_db()
     with conn:
         result = conn.execute(
@@ -82,12 +90,13 @@ def update_note(note_id, data):
             (
                 data['title'],
                 data['content'],
-                json.dumps(data['tags']),
+                json.dumps(tags),
                 data['category_id'],
                 note_id
             )
         )
         return result.rowcount > 0
+
 
 def update_note_category(note_id, category_id):
     conn = get_db()
