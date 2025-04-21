@@ -138,6 +138,7 @@ async function loadCategories(preloadCategoryId = null, preloadNoteId = null) {
 	  tab.addEventListener('click', () => {
 		setActiveSection(cat.id);
 		selectSection(cat.id);
+
 	  });
 
 	  tab.addEventListener('dragover', e => {
@@ -256,7 +257,13 @@ async function selectSection(categoryId, noteToSelect = null) {
       setActiveNote(note.id);
       //showEditor(note);
 	  showPrevEditor(note);
+	  
+	  // ✅ 更新 URL：主動同步筆記的 category/notebook
+	  const notebookId = note.notebook_id || currentNotebookId;
+	  const categoryId = note.category_id || currentCategory;
 
+	  const hash = `#notetree?notebook=${notebookId}&category=${categoryId}`;
+	  window.history.replaceState({}, '', hash);
     });
 
     li.addEventListener('contextmenu', e => {

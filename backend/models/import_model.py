@@ -51,7 +51,7 @@ def merge_notes_from_db(import_db_path, strategy='ignore'):
                 nb_id = cur.lastrowid
                 notebooks_merged += 1
             nb['resolved_id'] = nb_id
-
+            print(f"Notebook resolved_id : {nb_id}")
         # 匯入 categories（根據 name + notebook_id 唯一）
         for cat in imported_categories:
             nb_id = next((nb['resolved_id'] for nb in imported_notebooks if nb['id'] == cat.get('notebook_id')), None)
@@ -66,6 +66,7 @@ def merge_notes_from_db(import_db_path, strategy='ignore'):
                 cat_id = cur.lastrowid
                 categories_merged += 1
             cat['resolved_id'] = cat_id
+            print(f"Category resolved_id : {cat_id}")
 
         # 匯入 notes（根據 strategy 決定）
         for note in imported_notes:
