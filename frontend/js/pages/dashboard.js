@@ -33,7 +33,7 @@ export async function init() {
     // Tags
     const tagRes = await fetch('/api/tags');
     const tagData = await tagRes.json();
-    const sortedTags = tagData.sort((a, b) => b.count - a.count).slice(0, 20);
+    const sortedTags = tagData.sort((a, b) => b.count - a.count).slice(0, 10);
     const totalTagCount = tagData.reduce((sum, tag) => sum + tag.count, 0);
 
     const tagList = document.getElementById('topTags');
