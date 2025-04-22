@@ -13,6 +13,9 @@ function runWhenIdleOrLater(callback) {
 }
 
 async function loadCategories(notebookId, preselectCategoryId = null) {
+  console.log("loadCategories")
+  console.log(notebookId)
+  console.log(preselectCategoryId)
   const categorySelect = document.getElementById('categorySelect');
   categorySelect.innerHTML = '<option value="">Select category</option>';
 
@@ -90,7 +93,6 @@ export async function init() {
   });
   
 
-  await loadCategories();
 
   const tagContainer = document.getElementById('tagContainer');
   const tagInput = document.getElementById('tagInput');
