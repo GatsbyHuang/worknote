@@ -12,7 +12,8 @@ def get_notes():
     tag = request.args.get('tag')
     category_id = request.args.get('category_id', type=int)
     userid = request.args.get('userid')
-    notes = get_all_notes(limit=limit, tag=tag, category_id=category_id, userid=userid)
+    notebook_id = request.args.get('notebook_id', type=int)
+    notes = get_all_notes(limit=limit, tag=tag, category_id=category_id, userid=userid, notebook_id=notebook_id)
     return jsonify(notes)
 
 @notes_bp.route('/<note_id>', methods=['GET'])

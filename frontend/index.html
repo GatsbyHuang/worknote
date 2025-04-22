@@ -150,6 +150,18 @@
 		  <button id="fuzzyModalClose" class="ml-2 text-gray-500 hover:text-red-500 text-xl font-bold">&times;</button>
 		</div>
 
+		<!-- Advanced Search -->
+		<div class="text-right">
+		  <button id="toggleAdvancedSearch" class="text-sm text-blue-600 hover:underline">Advanced Search ▼</button>
+		</div>
+		<div id="advancedSearchPanel" class="hidden bg-gray-50 border border-gray-200 rounded p-3 space-y-2">
+		  <label for="searchNotebookSelect" class="block text-sm font-medium text-gray-700">Filter by Notebook:</label>
+		  <select id="searchNotebookSelect" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+			<option value="">All Notebooks</option>
+			<!-- 動態載入 notebook 選項 -->
+		  </select>
+		</div>
+
 		<!-- Search Results -->
 		<ul id="fuzzyResults" class="divide-y divide-gray-200 max-h-[50vh] overflow-y-auto text-sm">
 		  <li class="text-gray-400 px-2 py-4 text-center">Start typing to search...</li>
@@ -166,20 +178,23 @@
 			  <div class="flex-1">
 				<div class="font-medium text-gray-800">Title</div>
 				<div class="text-xs text-gray-500 line-clamp-2">Content preview...</div>
-				<div class="flex gap-2 mt-1">
+				<div class="flex gap-2 mt-1 flex-wrap">
 				  <span class="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">Notebook</span>
 				  <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">Category</span>
+				  <!-- Tags will be inserted here -->
 				</div>
 			  </div>
 			</div>
 		  </li>
 		</template>
 
+
 		<template id="fuzzyEmptyItemTemplate">
 		  <li class="bg-gray-50 text-gray-400 px-3 py-3 italic rounded text-center">No match</li>
 		</template>
 	  </div>
 	</div>
+
 
 
 
@@ -240,7 +255,7 @@
 
 
 
-  <script src="js/pages/fuzzy-modal.js"></script>
+  <script src="js/pages/globalsearch.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <!-- UI Script -->

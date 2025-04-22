@@ -3,7 +3,7 @@ import json
 from db import get_db
 from typing import List
 
-def get_all_notes(limit=None, tag=None, category_id=None, userid=None):
+def get_all_notes(limit=None, tag=None, category_id=None, userid=None, notebook_id=None):
     conn = get_db()
     cur = conn.cursor()
 
@@ -26,6 +26,10 @@ def get_all_notes(limit=None, tag=None, category_id=None, userid=None):
     if userid:
         query += " AND n.userid = ?"
         params.append(userid)
+
+    if notebook_id:
+        query += " AND nb.id = ?"
+        params.append(notebook_id)
 
     query += " ORDER BY n.created_at DESC"
 
