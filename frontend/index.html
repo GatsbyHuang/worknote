@@ -68,6 +68,10 @@
 	  <div class="flex items-center gap-4">
 		<input id='globalSearchBtn' type="text" placeholder="Search..."
 		  class="px-3 py-1 border rounded-md w-64 bg-white border-gray-300 focus:ring-1 focus:ring-blue-400 text-sm" />
+		<!-- Theme Toggle Icon -->
+		<button id="themeToggleBtn" class="text-gray-500 hover:text-blue-500 transition relative">
+		  <i data-lucide="palette" class="w-5 h-5"></i>
+		</button>
 		<div class="relative">
 		  <img id="userAvatar" src="https://www.svgrepo.com/show/452030/avatar-default.svg" alt="User"
 			class="w-8 h-8 rounded-full cursor-pointer border" />
@@ -181,7 +185,7 @@
 				<div class="flex gap-2 mt-1 flex-wrap">
 				  <span class="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">Notebook</span>
 				  <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">Category</span>
-				  <!-- Tags will be inserted here -->
+
 				</div>
 			  </div>
 			</div>
@@ -220,6 +224,26 @@
        </div>
      </div>
    </div>
+   
+   <!-- Theme Modal -->
+	<div id="themeModal" class="absolute right-12 top-10 bg-white shadow-lg rounded-md p-3 hidden z-50 w-48">
+	  <div class="text-xs text-gray-500 mb-2">Select Theme:</div>
+	  <button data-theme="default" class="flex items-center gap-2 w-full px-2 py-1 rounded hover:bg-gray-100">
+		<span class="w-4 h-4 bg-gray-400 rounded-full"></span> Default
+	  </button>
+	  <button data-theme="spring" class="flex items-center gap-2 w-full px-2 py-1 rounded hover:bg-pink-100">
+		<span class="w-4 h-4 bg-pink-300 rounded-full"></span> 🌸 Spring
+	  </button>
+	  <button data-theme="summer" class="flex items-center gap-2 w-full px-2 py-1 rounded hover:bg-sky-100">
+		<span class="w-4 h-4 bg-sky-300 rounded-full"></span> ☀️ Summer
+	  </button>
+	  <button data-theme="autumn" class="flex items-center gap-2 w-full px-2 py-1 rounded hover:bg-orange-100">
+		<span class="w-4 h-4 bg-orange-300 rounded-full"></span> 🍂 Autumn
+	  </button>
+	  <button data-theme="winter" class="flex items-center gap-2 w-full px-2 py-1 rounded hover:bg-blue-100">
+		<span class="w-4 h-4 bg-blue-300 rounded-full"></span> ❄️ Winter
+	  </button>
+	</div>
 
 	<!-- 📚 Notebook Context Menu -->
 	<div id="notebookContextMenu"
@@ -263,6 +287,7 @@
   import Router from './js/router.js';
   import { updateUserUI, initUserHandler } from './js/pages/user.js';
   import { loadNotebookList, NotebookMenu, initNoteBookHandler } from './js/pages/notebook.js';
+  import { updateThemeUI, initThemeHandler } from './js/pages/theme.js';
 
   console.log('🧪 DOM Loaded');
 
@@ -300,6 +325,8 @@
     initNoteBookHandler();
     loadNotebookList();
     NotebookMenu();
+	updateThemeUI();
+    initThemeHandler();
     lucide.createIcons(); // refresh icons if needed
   });
 
