@@ -229,7 +229,7 @@ function startAutoSave() {
 	  console.log("auto saved.")
       showAutoSaveMask();
     }
-  }, 10000);
+  }, 60000);
 }
 
 startAutoSave();
