@@ -5,9 +5,10 @@ let isEdit = false;
 
 function runWhenIdleOrLater(callback) {
   if ('requestIdleCallback' in window) {
+	console.log("support requestIdleCallback")
     requestIdleCallback(callback);
   } else {
-    setTimeout(callback, 200);
+    setTimeout(callback, 500);
   }
 }
 
@@ -107,64 +108,62 @@ export async function init() {
     tagContainer.insertBefore(tag, tagInput);
   }
 
-  function buildRelatedList(currentNote, allNotes) {
-    const list = document.getElementById('relatedList');
-    if (!list || !currentNote || !allNotes.length) return;
+function buildRelatedList(currentNote, allNotes) {
+  const list = document.getElementById('relatedList');
+  console.log(list)
+  if (!list || !currentNote || !allNotes.length) return;
 
-    const currentTags = new Set(
-      Array.isArray(currentNote.tags)
-        ? currentNote.tags
-        : JSON.parse(currentNote.tags || '[]')
-    );
-    const currentTitle = (currentNote.title || '').toLowerCase();
-
-    const related = allNotes.filter(note => {
-      if (note.id === currentNote.id) return false;
-
-      const titleMatch = note.title?.toLowerCase().includes(currentTitle);
-
-      let tags = [];
-      try {
-        tags = Array.isArray(note.tags) ? note.tags : JSON.parse(note.tags || '[]');
-      } catch {
-        tags = [];
-      }
-      const tagMatch = tags.some(tag => currentTags.has(tag));
-
-      return titleMatch || tagMatch;
-    });
-
-    list.innerHTML = '';
-
-    if (!related.length) {
-      list.innerHTML = '<li class="text-gray-400">No related notes found.</li>';
-      return;
-    }
-
-    const container = document.createElement('div');
-    container.className = 'flex flex-wrap gap-3';
-
-    related.forEach(note => {
-      const a = document.createElement('a');
-      a.href = '#';
-      a.className = 'text-blue-600 hover:underline whitespace-nowrap';
-      a.textContent = note.title;
-      a.dataset.id = note.id;
-
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        sessionStorage.setItem('currentNoteId', note.id);
-        window.location.hash = '#note-editor';
-        window.dispatchEvent(new Event('popstate'));
-      });
-
-      container.appendChild(a);
-    });
-
-    const li = document.createElement('li');
-    li.appendChild(container);
-    list.appendChild(li);
+  const currentTitle = (currentNote.title || '').trim().toLowerCase();
+  console.log("currentTitle=",currentTitle)
+  if (currentTitle === 'untitled' || currentTitle === '') {
+    list.innerHTML = '<li class="text-gray-400">Draft mode - no related notes.</li>';
+    return;  // 直接跳出，不做 fuzzy search
   }
+
+  list.innerHTML = '';
+
+  const fuse = new Fuse(allNotes.filter(note => note.id !== currentNote.id), {
+    keys: [
+      { name: 'title', weight: 0.3 },
+      { name: 'tags', weight: 0.2 },
+      { name: 'content', weight: 0.5 }
+    ],
+    threshold: 0.3
+  });
+
+  const searchQuery = currentNote.title || '';
+  const results = fuse.search(searchQuery).slice(0, 5);  // 限制前5
+
+  if (!results.length) {
+    list.innerHTML = '<li class="text-gray-400">No related notes found.</li>';
+    return;
+  }
+
+  const container = document.createElement('div');
+  container.className = 'flex flex-wrap gap-3';
+
+  results.forEach(({ item: note }) => {
+    const a = document.createElement('a');
+    a.href = '#';
+    a.className = 'text-blue-600 hover:underline whitespace-nowrap';
+    a.textContent = note.title;
+    a.dataset.id = note.id;
+
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      sessionStorage.setItem('currentNoteId', note.id);
+      window.location.hash = '#note-editor';
+      window.dispatchEvent(new Event('popstate'));
+    });
+
+    container.appendChild(a);
+  });
+
+  const li = document.createElement('li');
+  li.appendChild(container);
+  list.appendChild(li);
+}
+
 
   tagInput?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && tagInput.value.trim()) {
@@ -296,9 +295,13 @@ async function loadTagSuggestions() {
       const tags = JSON.parse(note.tags || '[]');
       tags.forEach(tagText => addTag(tagText));
 
-      const allRes = await fetch('/api/notes');
-      const allNotes = await allRes.json();
-      runWhenIdleOrLater(() => buildRelatedList(note, allNotes));
+
+	  const limit = 10;  // 你可以根據需要調整這個值
+	  const relatedRes = await fetch(`/api/notes/related/${note.id}?limit=${limit}`);
+      const relatedNotes = await relatedRes.json();
+      runWhenIdleOrLater(() => buildRelatedList(note, relatedNotes));
+	  
+
     } catch (err) {
       console.error('❌ 載入筆記失敗：', err);
     }
