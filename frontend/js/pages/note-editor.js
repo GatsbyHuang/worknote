@@ -71,9 +71,9 @@ export async function init() {
     branding: false,
     license_key: 'gpl',
     codesample_languages: [
+      { text: 'Python', value: 'python' },
       { text: 'HTML/XML', value: 'markup' },
       { text: 'JavaScript', value: 'javascript' },
-      { text: 'Python', value: 'python' },
       { text: 'Shell', value: 'bash' },
       { text: 'SQL', value: 'sql' }
     ],
@@ -246,26 +246,39 @@ function showAutoSaveMask() {
 
 
 
-  async function loadTagSuggestions() {
-    try {
-      const res = await fetch('/api/tags');
-      const data = await res.json();
-      const tagBox = document.getElementById('tagSuggestions');
-      if (!tagBox) return;
+async function loadTagSuggestions() {
+  try {
+    // 取得 URL 中的參數
+    const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
+    const notebookId = urlParams.get('notebook');
+    const categoryId = urlParams.get('category');
 
-      tagBox.innerHTML = '';
-      (data || []).forEach(tagObj => {
-        const tag = tagObj.name;
-        const btn = document.createElement('button');
-        btn.textContent = `#${tag}`;
-        btn.className = 'px-2 py-1 text-xs bg-gray-100 rounded hover:bg-blue-100';
-        btn.addEventListener('click', () => addTag(tag));
-        tagBox.appendChild(btn);
-      });
-    } catch (err) {
-      console.error('❌ 無法取得 tag suggestions:', err);
-    }
+    // 組合 API 查詢參數
+    const params = new URLSearchParams();
+    if (notebookId) params.append('notebook_id', notebookId);
+    if (categoryId) params.append('category_id', categoryId);
+
+    const res = await fetch(`/api/tags${params.toString() ? `?${params.toString()}` : ''}`);
+    const data = await res.json();
+
+    const tagBox = document.getElementById('tagSuggestions');
+    if (!tagBox) return;
+
+    tagBox.innerHTML = '';
+    (data || []).forEach(tagObj => {
+      const tag = tagObj.name;
+      const btn = document.createElement('button');
+      btn.textContent = `#${tag}`;
+      btn.className = 'px-2 py-1 text-xs bg-gray-100 rounded hover:bg-blue-100';
+      btn.addEventListener('click', () => addTag(tag));
+      tagBox.appendChild(btn);
+    });
+  } catch (err) {
+    console.error('❌ 無法取得 tag suggestions:', err);
   }
+}
+
+
 
   await loadTagSuggestions();
 

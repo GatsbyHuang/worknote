@@ -140,21 +140,29 @@
 
   <!-- Style -->
 <style>
-	#contextTooltip {
-	  transition: opacity 0.2s ease;
-	}
+  /* ============================== */
+  /* Tooltip 動畫 */
+  /* ============================== */
+  #contextTooltip {
+    transition: opacity 0.2s ease;
+  }
+
+  /* ============================== */
+  /* Note List 左側清單樣式 */
+  /* ============================== */
   #noteList li {
     @apply bg-white rounded-xl border border-gray-200 p-4 shadow-sm transition-all hover:shadow-md hover:border-blue-300 hover:ring hover:ring-blue-100;
   }
-
   #noteList li.active {
     @apply ring-2 ring-blue-300 bg-blue-50;
   }
-
   #noteList li .tag {
     @apply inline-block bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full mr-1;
   }
 
+  /* ============================== */
+  /* Section Items (Notebook / Categories) */
+  /* ============================== */
   #sectionItems li {
     @apply flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-gray-700 transition;
   }
@@ -168,38 +176,91 @@
     @apply ring-2 ring-blue-400 bg-blue-50;
   }
 
-  /* 強化 modal loading spinner */
+  /* ============================== */
+  /* Modal Loading Spinner */
+  /* ============================== */
   #noteEditLoading .spinner {
     @apply animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent;
   }
-  
-    /* 在 preview 中補上 table 樣式 */
-     #noteContent table {
-        border-collapse: collapse !important;
-        width: 100% !important;
-        border: 1px solid #ccc !important;
-      }
 
-      #noteContent th,
-      #noteContent td {
-        border: 1px solid #ccc !important;
-        padding: 6px 12px !important;
-        text-align: left !important;
-      }
-      
-    #noteContent ol {
-        list-style-type: decimal !important;
-        padding-left: 1.5rem !important;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-      }
+  /* ============================== */
+  /* 護眼模式 - Preview 區塊 */
+  /* ============================== */
+  #noteDetail {
+    background-color: #f4f9f4; /* 淺草綠 */
+    color: #2e3b2c; /* 深橄欖綠 */
+  }
 
-      #noteContent li {
-        margin-bottom: 0.5rem;
-      }
+  #noteContent {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: #2e3b2c;
+  }
+
+  #noteContent h1, 
+  #noteContent h2, 
+  #noteContent h3 {
+    color: #1a2e1a;
+    margin-top: 1.2em;
+    margin-bottom: 0.6em;
+  }
+
+  /* List 樣式 */
+  #noteContent ol {
+    list-style-type: decimal !important;
+    padding-left: 1.5rem !important;
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
+  #noteContent ul {
+    list-style-type: disc !important;
+    padding-left: 1.5rem !important;
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
+  #noteContent li {
+    margin-bottom: 0.5rem;
+  }
+
+  /* Table 樣式 */
+  #noteContent table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    border: 1px solid #ccc !important;
+    margin: 1em 0;
+    background-color: #ffffff;
+  }
+  #noteContent th, 
+  #noteContent td {
+    border: 1px solid #ccc !important;
+    padding: 6px 12px !important;
+    text-align: left !important;
+  }
+
+  /* Code Block 樣式 */
+  #noteContent pre, 
+  #noteContent code {
+    background-color: #dfeee0;
+    color: #1b401b;
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-family: Consolas, monospace;
+  }
+  #noteContent pre {
+    padding: 1em;
+    overflow-x: auto;
+  }
+
+  /* Tags 標籤 */
+  #noteTags span {
+    background-color: #d2ecd2;
+    color: #2b4d2b;
+    padding: 0.2em 0.6em;
+    border-radius: 999px;
+    font-size: 0.85rem;
+  }
 </style>
 
-  </style>
 <script src="https://unpkg.com/lucide@latest"></script>
 
 
