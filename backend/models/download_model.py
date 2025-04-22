@@ -99,6 +99,11 @@ def generate_notebook_pdf(notebook_id):
         '.toc h2 { font-size: 24px; color: #555; }',
         '.toc ul { list-style-type: none; padding-left: 0; }',
         '.toc li { margin-bottom: 5px; }',
+        'img { max-width: 100%; height: auto; display: block; margin: 10px auto; border: 1px solid #ccc; padding: 5px; background: #f9f9f9; }',
+        'table { border-collapse: collapse; width: 100%; table-layout: fixed; word-break: break-word; }',
+        'td, th { border: 1px solid #ccc; padding: 8px; word-break: break-word; }',
+        'th { background-color: #f0f0f0; font-weight: bold; text-align: left; }',
+        'tr:nth-child(even) { background-color: #fafafa; }',
         '</style></head><body>'
     ]
 

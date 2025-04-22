@@ -1,5 +1,5 @@
 // notetree.js - for note-browser.html
-import { bindOnce } from './utils.js';
+import { bindOnce, showDownloadSpinner, hideDownloadSpinner } from './utils.js';
 
 let currentCategory = null;
 let currentNotebookId = null;
@@ -116,41 +116,50 @@ function setupButtonEvents() {
   window.__addNoteHandler__ = addNoteHandler;
   
   
-   // --- Download Note ---
-  const downloadBtn = document.getElementById('downloadNoteBtn');
-  if (window.__downloadNoteHandler__) {
-    downloadBtn?.removeEventListener('click', window.__downloadNoteHandler__);
-  }
+	 // --- Download Note ---
+	const downloadBtn = document.getElementById('downloadNoteBtn');
+	if (window.__downloadNoteHandler__) {
+	  downloadBtn?.removeEventListener('click', window.__downloadNoteHandler__);
+	}
 
-  const downloadNoteHandler = async () => {
-    const noteId = sessionStorage.getItem('currentNoteId');
-    if (!noteId) {
-      alert('❗ Please select a note first!');
-      return;
-    }
+	const downloadNoteHandler = async () => {
+	  const noteId = sessionStorage.getItem('currentNoteId');
+	  if (!noteId) {
+		alert('❗ Please select a note first!');
+		return;
+	  }
 
-    try {
-      const res = await fetch(`/api/download/${noteId}/pdf`);
-      if (!res.ok) throw new Error('Download failed');
+	  showDownloadSpinner();  // 顯示 spinner
 
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
+	  try {
+		const res = await fetch(`/api/download/${noteId}/pdf`);
+		if (!res.ok) throw new Error('Download failed');
 
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `note_${noteId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('❌ Download note failed:', err);
-      alert('❌ Failed to download note.');
-    }
-  };
+		const blob = await res.blob();
+		const url = window.URL.createObjectURL(blob);
 
-  downloadBtn?.addEventListener('click', downloadNoteHandler);
-  window.__downloadNoteHandler__ = downloadNoteHandler;
+		const a = document.createElement('a');
+		a.href = url;
+
+		const disposition = res.headers.get('Content-Disposition');
+		const match = disposition && disposition.match(/filename=\"?([^\";]+)\"?/);
+		const filename = match ? match[1] : `note_${noteId}.pdf`;
+
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		window.URL.revokeObjectURL(url);
+	  } catch (err) {
+		console.error('❌ Download note failed:', err);
+		alert('❌ Failed to download note.');
+	  } finally {
+		hideDownloadSpinner();  // 隱藏 spinner
+	  }
+	};
+
+	downloadBtn?.addEventListener('click', downloadNoteHandler);
+	window.__downloadNoteHandler__ = downloadNoteHandler;
   
 }
 

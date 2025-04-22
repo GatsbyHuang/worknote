@@ -134,6 +134,9 @@ export function NotebookMenu() {
 	bindOnce(document.getElementById('exportNotebookPdfOption'), 'click', async () => {
 	  if (!currentRightClickNotebookId) return;
 
+	  const spinner = document.getElementById('downloadSpinner');
+	  spinner?.classList.remove('hidden');  // 顯示 spinner
+
 	  try {
 		const res = await fetch(`/api/download/notebook/${currentRightClickNotebookId}/pdf`);
 		if (!res.ok) throw new Error('Download failed');
@@ -159,8 +162,11 @@ export function NotebookMenu() {
 	  } catch (err) {
 		console.error('❌ Notebook PDF download failed:', err);
 		alert('❌ Failed to download notebook PDF.');
+	  } finally {
+		spinner?.classList.add('hidden');  // 無論成功或失敗都隱藏 spinner
 	  }
 	});
+
 
 
 }
