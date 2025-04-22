@@ -1,4 +1,5 @@
 // ===== theme.js =====
+import { initUserHandler } from './user.js';  // ⬅️ 引入主題
 
 // 取得當前主題
 export function getTheme() {
@@ -73,6 +74,7 @@ export function initThemeHandler() {
       localStorage.setItem('selectedTheme', theme);
       sessionStorage.setItem('selectedTheme', theme);
       applyTheme(theme);
+	  initUserHandler()
       modal.classList.add('hidden');
     });
   });
