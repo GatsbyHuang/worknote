@@ -10,6 +10,7 @@ export function getTheme() {
 export function applyTheme(theme) {
   const sidebar = document.getElementById('sidebar');
   const header = document.querySelector('header');
+  const mobileHeader = document.querySelector('mobile-header');
   const main = document.getElementById('main-content');
   const newNoteBtn = document.getElementById('newNoteBtn');
 
@@ -17,6 +18,7 @@ export function applyTheme(theme) {
   sidebar.className = 'w-64 p-4 overflow-y-auto hidden lg:block transition-all duration-300 ease-in-out';
   header.className = 'hidden lg:flex justify-between items-center px-6 py-1.5 shadow-sm';
   newNoteBtn.className = 'fixed bottom-6 right-6 z-50 text-white p-4 rounded-full shadow-md focus:outline-none transition-all';
+  if (mobileHeader) mobileHeader.className = 'lg:hidden flex justify-between items-center px-4 py-2 shadow-md';
   if (main) main.className = 'flex-1 p-4 overflow-y-auto';
 
   // 加上主題樣式
@@ -26,12 +28,14 @@ export function applyTheme(theme) {
       sidebar.classList.add('bg-pink-50', 'backdrop-blur');
 	  newNoteBtn.classList.add('bg-green-400', 'hover:bg-green-500');
       if (main) main.classList.add('bg-pink-50/80');
-      break;
+      if (mobileHeader) mobileHeader.classList.add('bg-pink-100');  // 加這行
+	  break;
     case 'summer':
       header.classList.add('bg-sky-100');
       sidebar.classList.add('bg-sky-50', 'backdrop-blur');
 	  newNoteBtn.classList.add('bg-teal-400', 'hover:bg-teal-500');
       if (main) main.classList.add('bg-sky-50/80');
+	  if (mobileHeader) mobileHeader.classList.add('bg-sky-100');  // 加這行
       break;
     case 'autumn':
       header.classList.add('bg-orange-100');
@@ -44,12 +48,16 @@ export function applyTheme(theme) {
       sidebar.classList.add('bg-blue-50', 'backdrop-blur');
 	  newNoteBtn.classList.add('bg-indigo-400', 'hover:bg-indigo-500');
       if (main) main.classList.add('bg-blue-50/80');
-      break;
+      if (mobileHeader) mobileHeader.classList.add('bg-orange-100');  // 加這行
+	  if (mobileHeader) mobileHeader.classList.add('bg-blue-100');  // 加這行
+	  break;
     default:
       sidebar.classList.add('bg-white');
       header.classList.add('bg-white');
 	  newNoteBtn.classList.add('bg-slate-500', 'hover:bg-slate-600');
       if (main) main.classList.add('bg-white/50');
+	  if (mobileHeader) mobileHeader.classList.add('bg-white');  // 加這行
+
   }
 }
 

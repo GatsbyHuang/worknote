@@ -34,7 +34,7 @@ export function loadNotebookList() {
       notebooks.forEach(nb => {
         const a = document.createElement('a');
         a.href = `#notetree?notebook=${nb.id}`;
-        a.className = 'text-sm flex items-center gap-2 px-2 py-1 rounded hover:bg-blue-50 transition text-blue-700';
+		a.className = 'text-sm flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-100 transition-all duration-200 ease-in-out shadow-sm';
         a.dataset.notebookId = nb.id;
         a.innerHTML = `
           <i data-lucide="book" class="w-4 h-4 text-blue-600"></i>
