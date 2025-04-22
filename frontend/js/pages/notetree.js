@@ -114,6 +114,44 @@ function setupButtonEvents() {
 
   addBtn?.addEventListener('click', addNoteHandler);
   window.__addNoteHandler__ = addNoteHandler;
+  
+  
+   // --- Download Note ---
+  const downloadBtn = document.getElementById('downloadNoteBtn');
+  if (window.__downloadNoteHandler__) {
+    downloadBtn?.removeEventListener('click', window.__downloadNoteHandler__);
+  }
+
+  const downloadNoteHandler = async () => {
+    const noteId = sessionStorage.getItem('currentNoteId');
+    if (!noteId) {
+      alert('❗ Please select a note first!');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/download/${noteId}/pdf`);
+      if (!res.ok) throw new Error('Download failed');
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `note_${noteId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('❌ Download note failed:', err);
+      alert('❌ Failed to download note.');
+    }
+  };
+
+  downloadBtn?.addEventListener('click', downloadNoteHandler);
+  window.__downloadNoteHandler__ = downloadNoteHandler;
+  
 }
 
 

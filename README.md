@@ -37,6 +37,12 @@ Easily write, organize, export and import technical notes using a clean UI.
 git clone https://github.com/your-username/devnote.git
 cd devnote
 
+python -m pip install {module_name}
+
+open https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases
+to download gtk3-runtime-3.24.31-2022-01-04-ts-win64.exe
+
+
 # Start Flask backend
 python app.py
 

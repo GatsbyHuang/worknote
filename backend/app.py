@@ -11,6 +11,7 @@ from routes.imports import import_bp
 from routes.notebook import notebooks_bp
 from routes.version import version_bp
 from routes.search import search_bp
+from routes.download import download_bp
 #from routes.search_file import attachment_api
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='/')
@@ -34,6 +35,7 @@ app.register_blueprint(export_bp)
 app.register_blueprint(import_bp)
 app.register_blueprint(version_bp)
 app.register_blueprint(search_bp)
+app.register_blueprint(download_bp)
 #app.register_blueprint(attachment_api)
 
 

@@ -130,4 +130,37 @@ export function NotebookMenu() {
       alert(`❌ Rename failed: ${result?.error || 'Unknown error'}`);
     }
   });
+  
+	bindOnce(document.getElementById('exportNotebookPdfOption'), 'click', async () => {
+	  if (!currentRightClickNotebookId) return;
+
+	  try {
+		const res = await fetch(`/api/download/notebook/${currentRightClickNotebookId}/pdf`);
+		if (!res.ok) throw new Error('Download failed');
+
+		const blob = await res.blob();
+		const url = window.URL.createObjectURL(blob);
+
+		const a = document.createElement('a');
+		a.href = url;
+
+		// ⛑️ 從 header 讀取 filename
+		const disposition = res.headers.get('Content-Disposition');
+		const match = disposition && disposition.match(/filename=\"?([^\";]+)\"?/);
+		const filename = match ? match[1] : `notebook_${currentRightClickNotebookId}.pdf`;
+
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		window.URL.revokeObjectURL(url);
+
+		document.getElementById('notebookContextMenu')?.classList.add('hidden');
+	  } catch (err) {
+		console.error('❌ Notebook PDF download failed:', err);
+		alert('❌ Failed to download notebook PDF.');
+	  }
+	});
+
+
 }
