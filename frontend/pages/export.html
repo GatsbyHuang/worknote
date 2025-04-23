@@ -6,12 +6,18 @@
   <title>🧾 Note Export</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<style> 
+  .snow-block{
+  position: relative;  /* ⭐️ 確保這些內容有層級 */
+  z-index: 20;         /* ⭐️ 保證內容在雪花之上 */
+}
+</style>
 <body class="text-gray-800 font-sans min-h-screen bg-gray-50">
 <div class="max-w-6xl mx-auto px-6 py-8 space-y-6">
   <h1 class="text-2xl font-bold text-gray-800">🧾 Export Notes</h1>
 
   <!-- Filters 區塊 -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+  <div class="snow-block grid grid-cols-1 md:grid-cols-4 gap-4">
     <!-- ✅ Notebook -->
     <div>
       <h2 class="text-sm font-medium mb-1 text-gray-600">📓 Notebooks</h2>
@@ -47,7 +53,7 @@
   </div>
 
   <!-- Match Mode -->
-  <div class="mt-4">
+  <div class="snow-block mt-4">
     <h2 class="text-sm font-medium mb-1 text-gray-600">Match Mode</h2>
     <div class="flex items-center gap-6 text-sm text-gray-700 bg-white border rounded p-2 shadow-sm">
       <label class="inline-flex items-center">
@@ -62,7 +68,7 @@
   </div>
 
   <!-- Export Block -->
-  <div class="bg-white p-4 rounded-xl shadow-sm border mt-4">
+  <div class="snow-block bg-white p-4 rounded-xl shadow-sm border mt-4">
     <p class="text-sm text-gray-700">Estimated notes to export:
       <span id="noteCount" class="font-semibold text-blue-600">0</span>
     </p>

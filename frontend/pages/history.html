@@ -2,7 +2,7 @@
   <h1 class="text-2xl font-bold text-gray-800">📜 Note History</h1>
 
   <!-- 🔎 篩選區（卡片樣式） -->
-  <div class="bg-white rounded-xl shadow-sm px-4 py-3 flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+  <div class="snow-block bg-white rounded-xl shadow-sm px-4 py-3 flex flex-col md:flex-row md:justify-between md:items-center gap-3">
 
     <!-- 左側：Search + Filters -->
     <div class="flex flex-wrap gap-2 items-center flex-grow">
@@ -31,7 +31,7 @@
   </div>
 
   <!-- 📄 筆記列表 -->
-  <ul id="historyNoteList" class="divide-y divide-gray-200 text-sm bg-white rounded-xl shadow p-4 space-y-4">
+  <ul id="historyNoteList" class="snow-block divide-y divide-gray-200 text-sm bg-white rounded-xl shadow p-4 space-y-4">
     <li class="text-gray-400">Loading...</li>
   </ul>
 
@@ -67,4 +67,11 @@
   .tag-normal {
     @apply bg-gray-100 text-gray-800;
   }
+  
+    .snow-block{
+	  position: relative;  /* ⭐️ 確保這些內容有層級 */
+	  z-index: 20;         /* ⭐️ 保證內容在雪花之上 */
+	}
+
+
 </style>
