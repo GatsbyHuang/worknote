@@ -6,6 +6,19 @@
   <title>Note Browser</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
+<style>
+
+#noteDetail, 
+#noteList,
+#sectionItemsWrapper {
+  position: relative;  /* ⭐️ 確保這些內容有層級 */
+  z-index: 20;         /* ⭐️ 保證內容在雪花之上 */
+}
+
+
+</style>
+
 <body class="text-gray-800 font-sans h-screen overflow-hidden">
 
 <!-- Responsive Layout -->

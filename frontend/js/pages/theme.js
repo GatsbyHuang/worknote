@@ -10,7 +10,7 @@ export function getTheme() {
 export function applyTheme(theme) {
   const sidebar = document.getElementById('sidebar');
   const header = document.querySelector('header');
-  const mobileHeader = document.querySelector('mobile-header');
+  const mobileHeader = document.querySelector('#mobile-header');
   const main = document.getElementById('main-content');
   const newNoteBtn = document.getElementById('newNoteBtn');
 
@@ -24,36 +24,38 @@ export function applyTheme(theme) {
   // 加上主題樣式
   switch (theme) {
     case 'spring':
-      header.classList.add('bg-pink-100');
-      sidebar.classList.add('bg-gradient-to-b', 'from-pink-50', 'to-pink-100');  //漸層效果
+      //header.classList.add('bg-pink-100');
+      header.classList.add('bg-gradient-to-r', 'from-pink-200', 'to-pink-100');  //漸層效果
+      //sidebar.classList.add('bg-gradient-to-b', 'from-pink-50', 'to-pink-100');  //漸層效果
+      sidebar.classList.add('bg-pink-100');
 	  newNoteBtn.classList.add('bg-green-400', 'hover:bg-green-500');
-      if (main) main.classList.add('bg-pink-50/80');
+      //if (main) main.classList.add('bg-pink-50/80');
+      if (main) main.classList.add('bg-gradient-to-br', 'from-pink-50', 'to-pink-100');  //漸層效果
       if (mobileHeader) mobileHeader.classList.add('bg-pink-100'); 
 	  addSeasonEffect('#season_div','🌸', 5);
       break;
     case 'summer':
-      header.classList.add('bg-sky-100');
-      sidebar.classList.add('bg-gradient-to-b', 'from-sky-50', 'to-sky-100'); //漸層效果
+      header.classList.add('bg-gradient-to-r', 'from-sky-200', 'to-sky-100');
+      sidebar.classList.add('bg-sky-100');
 	  newNoteBtn.classList.add('bg-teal-400', 'hover:bg-teal-500');
-      if (main) main.classList.add('bg-sky-50/80');
+      if (main) main.classList.add('bg-gradient-to-br', 'from-sky-50', 'to-sky-100');  //漸層效果
 	  if (mobileHeader) mobileHeader.classList.add('bg-sky-100');
       addSeasonEffect('#season_div','☀️', 5);
       break;
     case 'autumn':
-      header.classList.add('bg-orange-100');
-      sidebar.classList.add('bg-gradient-to-b', 'from-orange-50', 'to-orange-100'); //漸層效果
+      header.classList.add('bg-gradient-to-r', 'from-orange-200', 'to-orange-100');
+      sidebar.classList.add('bg-orange-100');
       newNoteBtn.classList.add('bg-orange-400', 'hover:bg-orange-500');
-	  if (main) main.classList.add('bg-orange-50/80');
+	  if (main) main.classList.add('bg-gradient-to-br', 'from-orange-50', 'to-orange-100');  //漸層效果
       if (mobileHeader) mobileHeader.classList.add('bg-orange-100');
       addSeasonEffect('#season_div','🍂',5);
       break;
     case 'winter':
-      header.classList.add('bg-blue-100');
-      sidebar.classList.add('bg-gradient-to-b', 'from-blue-50', 'to-blue-100'); //漸層效果
+      header.classList.add('bg-gradient-to-r', 'from-blue-200', 'to-blue-100');
+      sidebar.classList.add('bg-blue-100');
 	  newNoteBtn.classList.add('bg-indigo-400', 'hover:bg-indigo-500');
-      if (main) main.classList.add('bg-blue-50/80');
-      if (mobileHeader) mobileHeader.classList.add('bg-orange-100');
-	  if (mobileHeader) mobileHeader.classList.add('bg-blue-100');
+      if (main) main.classList.add('bg-gradient-to-br', 'from-blue-50', 'to-blue-100');  //漸層效果
+      if (mobileHeader) mobileHeader.classList.add('bg-blue-100');
       sidebar.classList.add('relative');
       addSeasonEffect('#season_div','❄️', 5);
 	  break;

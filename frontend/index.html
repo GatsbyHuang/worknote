@@ -36,48 +36,28 @@
 }
 
 
-
-.sidebar-item {
-  position: relative; /* 開啟 z-index */
-  z-index: 30;        /* 繼承 sidebar 的層級 */
-}
-
-.sidebar-item:hover {
-  z-index: 20;        /* Hover 時更高，確保在最上層 */
-}
-
-
-#main-content {
-  position: relative;  /* ⭐️ 確保有定位層級 */
-  z-index: 10;         /* ⭐️ 高於 season_div */
-}
-
-/* 全畫面飄落效果 */
 #season_div {
-  position: fixed;       /* 固定在畫面上 */
-  top: 0;
+  position: absolute;       /* 固定在畫面上 */
+  top: -20px;
   left: 0;
   width: 100%;
   height: 100vh;         /* 整個畫面 */
   pointer-events: none;  /* 不擋住其他互動 */
-  z-index: 10;           /* 確保在內容上面，但不超過 modal */
+  z-index: 11;           /* 確保在內容上面，但不超過 modal */
   overflow: hidden;      /* 飄出畫面不要顯示 */
 }
 
 
 #season_div .flake {
   position: absolute;
-  top: -40px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 18px;
-  opacity: 0.5;
-  animation: snow-fall 10s linear infinite, snow-sway 4s ease-in-out infinite alternate;
-  pointer-events: none;  /* 確保不干擾點擊 */
-  mix-blend-mode: screen; /* 混色模式，遇到文字會柔和融合 */
-  z-index: 10;  /* 飄在 content 前面，但在 sidebar 項目後面 */
+  top: 0; /* 從螢幕頂端開始 */
+  left: 50%; /* 起始位置水平置中 */
+  transform: translateX(-50%); /* 調整置中 */
+  font-size: 24px;
+  opacity: 0.3;
+  animation: snow-fall 12s linear infinite, snow-sway 4s ease-in-out infinite alternate;
+  z-index: 11; /* 確保在最上層 */
 }
-
 
 @keyframes snow-fall {
   0% { transform: translateY(0); }
@@ -89,10 +69,6 @@
   100% { margin-left: 20px; }
 }
 
-
-
-
-
 </style>
 
 
@@ -103,7 +79,6 @@
   <!-- Mobile Top Bar -->
   <div  id="mobile-header" class="lg:hidden flex justify-between items-center bg-white px-4 py-2 shadow-md">
 	<div class="flex items-center gap-2">
-	  <img src="/images/logo.png" alt="Logo" class="h-8 w-8">
 	</div>
     <button id="menuToggle" class="text-gray-600 focus:outline-none">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,7 +115,7 @@
 		<div class="relative">
 		  <img id="userAvatar" src="https://www.svgrepo.com/show/452030/avatar-default.svg" alt="User"
 			class="w-8 h-8 rounded-full cursor-pointer border" />
-		  <div id="userIdLabel" class="absolute right-0 mt-1 text-xs text-right text-gray-500 hidden"></div>
+            <div id="userIdLabel" class="absolute right-0 mt-1 text-xs text-right hidden w-32 truncate z-50 text-black"></div>
 		</div>
 	  </div>
 	</header>
@@ -337,7 +312,7 @@
 	  </div>
 	</div>
 	
-	<div id="downloadSpinner" class="fixed top-4 right-4 flex items-center gap-2 bg-white border border-gray-300 rounded px-3 py-2 shadow text-gray-700 text-sm hidden">
+	<div id="downloadSpinner" class="z-[1000] fixed top-4 right-4 flex items-center gap-2 bg-white border border-gray-300 rounded px-3 py-2 shadow text-gray-700 text-sm hidden">
 	  <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
 		<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
 		<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
