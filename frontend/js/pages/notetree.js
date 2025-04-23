@@ -491,24 +491,3 @@ async function showPrevEditor(note) {
   }
 	
 }
-
-async function showEditor(note) {
-  sessionStorage.setItem('currentNoteId', note.id);
-
-  // 取得當前的 notebookId / categoryId，組裝 hash
-  const params = new URLSearchParams(location.hash.split('?')[1] || '');
-  const notebookId = params.get('notebook');
-  const categoryId = params.get('category') || note.category_id; // 若已有筆記分類，優先用它
-
-  // 修改 hash 為 note-editor 並加上 notebook/category
-  const newHash = `#note-editor?notebook=${notebookId || ''}&category=${categoryId || ''}`;
-  window.history.pushState({}, '', newHash);
-
-  // 載入內容
-  const container = document.getElementById('noteDetail');
-  const html = await fetch('/pages/note-editor.html').then(res => res.text());
-  container.innerHTML = html;
-
-  const module = await import('/js/pages/note-editor.js');
-  await module.init();
-}

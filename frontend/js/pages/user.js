@@ -1,5 +1,6 @@
 // ===== user.js =====
 import { getTheme } from './theme.js';  // ⬅️ 引入主題
+import { bindOnce } from './utils.js';
 
 export function getUserId() {
   return localStorage.getItem('userId') || '';
@@ -60,10 +61,11 @@ export function closeLoginModal() {
   document.getElementById('loginModal').classList.add('hidden');
 }
 
+
 export function initUserHandler() {
-  document.getElementById('userAvatar')?.addEventListener('click', openLoginModal);
-  document.getElementById('loginCancel')?.addEventListener('click', closeLoginModal);
-  document.getElementById('loginConfirm')?.addEventListener('click', () => {
+  bindOnce(document.getElementById('userAvatar'), 'click', openLoginModal);
+  bindOnce(document.getElementById('loginCancel'), 'click', closeLoginModal);
+  bindOnce(document.getElementById('loginConfirm'), 'click', () => {
     const val = document.getElementById('userIdInput').value.trim();
     if (val) localStorage.setItem('userId', val);
     else localStorage.removeItem('userId');
@@ -71,10 +73,10 @@ export function initUserHandler() {
     updateUserUI();
   });
 
-  // 🔔 歡迎回來提示
+  // 🔔 歡迎回來提示（每次刷新或路由切換都顯示）
   const userId = getUserId();
   if (userId) {
-    showLoginNotice()
+    showLoginNotice();
   }
 }
 
@@ -82,8 +84,23 @@ export function showLoginNotice() {
   const userId = getUserId();
   if (!userId) return;
 
+  const greetings = [
+    `Welcome back, ${userId}! 🎉`,
+    `Good to see you again, ${userId}! 👋`,
+    `Hello, ${userId}! Ready to get things done? 💪`,
+    `Nice to have you here, ${userId}! 🌟`,
+    `What's on your mind today, ${userId}? 🤔`,
+    `Let's make some progress, ${userId}! 🚀`,
+    `Hey ${userId}, your notes missed you! 📒`,
+    `Back for more, ${userId}? Let's go! 🔥`,
+    `Hope you're having a great day, ${userId}! ☀️`,
+    `Welcome aboard, ${userId}! 🛳️`
+  ];
+
+  const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+
   const notice = document.createElement('div');
-  notice.textContent = `歡迎回來 ${userId} 🎉`;
+  notice.textContent = randomGreeting;
   notice.className = 'fixed top-16 right-4 text-white px-4 py-2 rounded shadow-lg transform translate-x-full opacity-0 transition-all duration-500';
 
   // 動態加背景色
@@ -112,9 +129,9 @@ export function showLoginNotice() {
     notice.classList.remove('translate-x-full', 'opacity-0');
   }, 100);
 
-  // 3秒後滑走
+  // 4秒後滑走
   setTimeout(() => {
     notice.classList.add('translate-x-full', 'opacity-0');
     setTimeout(() => notice.remove(), 500);
-  }, 3000);
+  }, 4000);
 }

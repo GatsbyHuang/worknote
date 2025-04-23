@@ -317,41 +317,44 @@
 
 
 
-  Router.onAfter((path) => {
-    console.log('✅ Loaded:', path);
-    updateUserUI();
-    initUserHandler();
-    initNoteBookHandler();
-    loadNotebookList();
-    NotebookMenu();
-	updateThemeUI();
-    initThemeHandler();
-    lucide.createIcons(); // refresh icons if needed
-  });
-
-  document.addEventListener('DOMContentLoaded', () => {
-    Router.init(); // ✅ 初始化 router
-
-    // ✅ Sidebar toggle setup
-    document.getElementById('sidebarToggleBtn')?.addEventListener('click', () => {
-      const sidebar = document.getElementById('sidebar');
-      sidebar.classList.toggle('w-64');
-      sidebar.classList.toggle('w-0');
-      sidebar.classList.toggle('p-4');
-      sidebar.classList.toggle('overflow-y-auto');
-      sidebar.classList.toggle('hidden');
+    Router.onAfter((path) => {
+      console.log('✅ Loaded:', path);
+      loadNotebookList();
+      NotebookMenu();
+      lucide.createIcons();
     });
 
-    // ✅ Sidebar active state toggle
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-      item.addEventListener('click', () => {
-        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-        item.classList.add('active');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      Router.init(); // ✅ 初始化 router
+
+      // Sidebar toggle setup
+      document.getElementById('sidebarToggleBtn')?.addEventListener('click', () => {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('w-64');
+        sidebar.classList.toggle('w-0');
+        sidebar.classList.toggle('p-4');
+        sidebar.classList.toggle('overflow-y-auto');
+        sidebar.classList.toggle('hidden');
       });
-    });
 
-    checkVersionAndNotify(); // 🔍 檢查版本
-  });
+      // Sidebar active state toggle
+      document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.addEventListener('click', () => {
+          document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+          item.classList.add('active');
+        });
+      });
+
+      // 初始化不需重複的 handler
+      initUserHandler();
+      initNoteBookHandler();
+      initThemeHandler();
+      updateUserUI();
+      updateThemeUI();
+
+      checkVersionAndNotify();
+    });
 
   async function checkVersionAndNotify() {
     try {
