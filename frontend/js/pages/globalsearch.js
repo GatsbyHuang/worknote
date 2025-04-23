@@ -36,6 +36,13 @@ async function loadFuzzyData(notebookId = null) {
 
 function handleFuzzySearch(keyword) {
   const resultList = document.getElementById('fuzzyResults');
+  
+    // 🔒 資料還沒載入好時，顯示 loading 或提示
+  if (!isFuzzyLoaded || !fuseTitle || !fuseTag || !fuseContent) {
+    resultList.innerHTML = '<li class="text-gray-400 px-2 py-4 text-center">Loading data, please wait...</li>';
+    return;
+  }
+  
   if (!keyword) {
     resultList.innerHTML = '<li class="text-gray-400 px-2 py-4 text-center">Start typing to search...</li>';
     return;
@@ -117,12 +124,14 @@ function initFuzzyModal() {
     document.getElementById('fuzzyModal').classList.add('hidden');
   });
 
-  inputEl?.addEventListener('input', (e) => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      handleFuzzySearch(e.target.value.trim());
-    }, 300);
-  });
+	inputEl?.addEventListener('input', (e) => {
+	  if (!isFuzzyLoaded) return;  // 🔒 防止還沒載入時觸發
+	  clearTimeout(debounceTimer);
+	  debounceTimer = setTimeout(() => {
+		handleFuzzySearch(e.target.value.trim());
+	  }, 300);
+	});
+
 
   document.getElementById('toggleAdvancedSearch')?.addEventListener('click', () => {
     const panel = document.getElementById('advancedSearchPanel');
