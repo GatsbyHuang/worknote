@@ -65,6 +65,7 @@ def get_notebook_stats():
 
         results.append({
             "name": notebook_name,
+            "id": notebook_id,
             "total_notes": total_notes,
             "last_updated": last_updated.split(' ')[0] if last_updated else None,
             "tags": [

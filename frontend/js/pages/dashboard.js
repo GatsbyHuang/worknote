@@ -134,10 +134,12 @@ async function loadNotebookStats() {
 
       const cardHTML = `
       <div class="rounded-xl border border-gray-200 p-4 bg-white space-y-4">
-        <div class="flex items-center gap-2">
-          <i data-lucide="book-open" class="w-5 h-5 text-indigo-500"></i>
-          <span class="font-semibold text-gray-700 text-lg">${nb.name}</span>
-        </div>
+		<div class="flex items-center gap-2">
+		  <i data-lucide="book-open" class="w-5 h-5 text-indigo-500"></i>
+		  <a href="#notetree?notebook=${nb.id}" class="font-semibold text-gray-700 text-lg hover:underline">
+			${nb.name}
+		  </a>
+		</div>
         <div class="grid grid-cols-2 gap-4">
           <div>
             <div class="text-gray-500 text-sm mb-1 flex items-center gap-1">
