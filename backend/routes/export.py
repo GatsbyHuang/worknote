@@ -81,6 +81,7 @@ def execute_export():
             )
 
     main_conn.close()
+    conn.close()
     return jsonify({'message': 'Export success', 'filename': export_db_path.name})
 
 
@@ -131,6 +132,7 @@ def export_full_notebooks():
             'tags': [{'name': tag} for tag in sorted(tag_set)],
             'users': [{'id': uid, 'name': uid} for uid in sorted(user_set)]
         })
+    db.close()
 
     return jsonify(result)
     

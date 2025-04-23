@@ -50,19 +50,10 @@ export async function init() {
     // Recent notes
     const noteRes = await fetch('/api/notes?limit=10');
     const notes = await noteRes.json();
-    const list = document.getElementById('recentNoteList');
-    renderNoteList(notes, list, getTagColor);
     renderTopCategories(notes);
+    loadNotebookStats();
+	
 
-    document.querySelectorAll('.limit-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const n = btn.dataset.limit;
-        const r = await fetch(`/api/notes?limit=${n}`);
-        const notes = await r.json();
-        renderNoteList(notes, list, getTagColor);
-        renderTopCategories(notes);
-      });
-    });
 
   } catch (err) {
     console.error('❌ Dashboard 載入失敗：', err);
@@ -113,65 +104,71 @@ function renderTopCategories(notes) {
   }).join('');
 }
 
-function renderNoteList(notes, list, getTagColor) {
-  list.innerHTML = '';
-  notes.forEach(note => {
-    const li = document.createElement('li');
-    li.className = 'p-3 rounded-lg bg-white shadow-sm hover:shadow-md transition space-y-1 cursor-pointer';
-	
-	
-    const time = new Date(note.created_at).toLocaleString('sv-SE').replace(' ', '&nbsp;');
-    const notebook = `<span class="bg-gray-200 text-gray-900 text-xs px-2 py-0.5 rounded">${note.notebook_name || 'No Notebook'}</span>`;
-	const category = `<span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded">${note.category_name}</span>`;
 
-    let tagHTML = '';
-    try {
-      const tags = Array.isArray(note.tags) ? note.tags : JSON.parse(note.tags || '[]');
-      tagHTML = tags.map(tag => {
-        const color = getTagColor(tag);
-        return `<span class="text-xs px-2 py-0.5 rounded" style="background-color:${color}">${tag}</span>`;
-      }).join(' ');
-    } catch { }
 
-    li.innerHTML = `
-    <div class="flex justify-between items-center flex-wrap gap-2 text-xs">
-      <div class="flex flex-wrap gap-2 items-center">${notebook}${category} ${tagHTML}</div>
-      <div class="flex items-center gap-2 whitespace-nowrap">
-        <button class="text-blue-500 hover:underline edit-btn">✏️ Edit</button>
-        <button class="text-red-500 hover:underline delete-btn">🗑 Delete</button>
-        <span class="text-gray-400">
-          🧑 ${note.userid || 'anonymous'} ・ ${time}
-        </span>
-      </div>
-    </div>
-    <div class="text-sm font-semibold text-gray-800 truncate">${note.title}</div>
-    <div class="text-sm text-gray-600 preview">${note.content.replace(/<[^>]+>/g, '').slice(0, 100)}...</div>
-    <div class="text-sm text-gray-700 hidden full">${note.content}</div>
-    `;
+async function loadNotebookStats() {
+  try {
+    const res = await fetch('/api/notebook_stats');
+    const notebooks = await res.json();
 
-    li.querySelector('.edit-btn')?.addEventListener('click', e => {
-      e.stopPropagation();
-      sessionStorage.setItem('currentNoteId', note.id);
-      window.location.hash = '#note-editor';
-      window.dispatchEvent(new Event('popstate'));
+
+    const container = document.getElementById('notebookAnalysis');
+    container.innerHTML = '';  // 清空舊內容
+
+    notebooks.forEach(nb => {
+		const lastUpdatedHTML = nb.last_updated
+		  ? `<div>Last Updated: ${formatRelativeTime(nb.last_updated)}</div>`  // 用人性化時間
+		  : '';
+		
+      const tagsHTML = nb.tags.map(tag =>
+        `<li class="flex justify-between">
+          <span>${tag.name}</span>
+          <span class="inline-block bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">${tag.count}</span>
+        </li>`).join('');
+
+      const categoriesHTML = nb.categories.map(cat =>
+        `<li class="flex justify-between">
+          <span>${cat.name}</span>
+          <span class="inline-block bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">${cat.count}</span>
+        </li>`).join('');
+
+      const cardHTML = `
+      <div class="rounded-xl border border-gray-200 p-4 bg-white space-y-4">
+        <div class="flex items-center gap-2">
+          <i data-lucide="book-open" class="w-5 h-5 text-indigo-500"></i>
+          <span class="font-semibold text-gray-700 text-lg">${nb.name}</span>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <div class="text-gray-500 text-sm mb-1 flex items-center gap-1">
+              <i data-lucide="tag" class="w-4 h-4"></i> Tags
+            </div>
+            <ul class="space-y-1">${tagsHTML}</ul>
+          </div>
+          <div>
+            <div class="text-gray-500 text-sm mb-1 flex items-center gap-1">
+              <i data-lucide="layers" class="w-4 h-4"></i> Categories
+            </div>
+            <ul class="space-y-1">${categoriesHTML}</ul>
+          </div>
+        </div>
+        <div class="flex justify-between items-center text-xs text-gray-500 pt-2 border-t border-dashed">
+          <div class="flex items-center gap-1 text-blue-600">
+            <i data-lucide="file-text" class="w-4 h-4"></i> ${nb.total_notes} Notes
+          </div>
+          <div> ${lastUpdatedHTML}</div>
+        </div>
+      </div>`;
+
+      container.insertAdjacentHTML('beforeend', cardHTML);
     });
 
-    li.querySelector('.delete-btn')?.addEventListener('click', async e => {
-      e.stopPropagation();
-      if (confirm(`確定刪除「${note.title}」？`)) {
-        const res = await fetch(`/api/notes/${note.id}`, { method: 'DELETE' });
-        if (res.ok) li.remove();
-      }
-    });
-
-    li.addEventListener('click', () => {
-      li.querySelector('.preview')?.classList.toggle('hidden');
-      li.querySelector('.full')?.classList.toggle('hidden');
-    });
-
-    list.appendChild(li);
-  });
+    lucide.createIcons();  // 重新渲染 lucide icons
+  } catch (err) {
+    console.error('❌ 無法載入 Notebook Stats:', err);
+  }
 }
+
 
 function getTagColor(tag) {
   const hash = [...tag].reduce((acc, c) => acc + c.charCodeAt(0), 0);

@@ -72,4 +72,5 @@ def query_notes_by_conditions(
 def get_distinct_userids():
     conn = get_db()
     rows = conn.execute('SELECT DISTINCT userid FROM notes WHERE userid IS NOT NULL').fetchall()
+    conn.close()
     return [row['userid'] for row in rows if row['userid']]

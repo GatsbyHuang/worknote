@@ -46,7 +46,8 @@ def generate_note_pdf(note_id):
     pdf_io = BytesIO()
     HTML(string=html_content).write_pdf(pdf_io)
     pdf_io.seek(0)
-
+    conn.close()
+    
     return pdf_io, title
 
 

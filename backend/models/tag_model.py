@@ -14,7 +14,7 @@ def get_all_tags_old():
                 tag_count[tag] = tag_count.get(tag, 0) + 1
         except Exception as e:
             print(f"[WARN] tag parse error: {e}")
-
+    conn.close()
     # 轉換為 list
     return [{"name": tag, "count": count} for tag, count in tag_count.items()]
 
@@ -51,5 +51,5 @@ def get_all_tags(notebook_id=None, category_id=None):
                 tag_count[tag] = tag_count.get(tag, 0) + 1
         except Exception as e:
             print(f"[WARN] tag parse error: {e}")
-
+    conn.close()
     return [{"name": tag, "count": count} for tag, count in tag_count.items()]

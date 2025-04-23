@@ -1,6 +1,85 @@
 import json
 from db import get_db
+from collections import defaultdict
+from datetime import datetime
 
+
+def get_notebook_stats():
+    conn = get_db()
+    cur = conn.cursor()
+
+    # Get all notebooks
+    cur.execute("SELECT id, name FROM notebooks")
+    notebooks = cur.fetchall()
+
+    results = []
+
+    for nb in notebooks:
+        notebook_id = nb['id']
+        notebook_name = nb['name']
+
+        # Get all categories under this notebook
+        cur.execute("SELECT id, name FROM categories WHERE notebook_id = ?", (notebook_id,))
+        categories = cur.fetchall()
+        category_map = {c['id']: c['name'] for c in categories}
+
+        # Get all notes under this notebook (via its categories)
+        cur.execute("""
+            SELECT n.tags, n.updated_at, n.category_id
+            FROM notes n
+            JOIN categories c ON n.category_id = c.id
+            WHERE c.notebook_id = ? AND n.archived = 0
+        """, (notebook_id,))
+        notes = cur.fetchall()
+
+        if not notes:
+            continue  # ❗️ 如果沒有 notes，跳過這個 notebook
+
+        tag_counter = defaultdict(int)
+        cat_counter = defaultdict(int)
+        total_notes = 0
+        last_updated = None
+
+        for note in notes:
+            total_notes += 1
+
+            # Tags (stored as JSON string or comma-separated)
+            try:
+                tags = json.loads(note['tags']) if note['tags'].strip().startswith('[') else note['tags'].split(',')
+            except:
+                tags = []
+            for tag in tags:
+                tag = tag.strip()
+                if tag:
+                    tag_counter[tag] += 1
+
+            # Categories
+            cat_id = note['category_id']
+            if cat_id in category_map:
+                cat_counter[category_map[cat_id]] += 1
+
+            # Last Updated
+            note_updated = note['updated_at']
+            if not last_updated or note_updated > last_updated:
+                last_updated = note_updated
+
+        results.append({
+            "name": notebook_name,
+            "total_notes": total_notes,
+            "last_updated": last_updated.split(' ')[0] if last_updated else None,
+            "tags": [
+                {"name": name, "count": count}
+                for name, count in sorted(tag_counter.items(), key=lambda x: -x[1])[:10]  # 取前10
+            ],
+            "categories": [
+                {"name": name, "count": count}
+                for name, count in sorted(cat_counter.items(), key=lambda x: -x[1])[:10]  # 取前10
+            ]
+        })
+
+    conn.close()
+    return results
+    
 def get_dashboard_stats():
     conn = get_db()
     cur = conn.cursor()
@@ -43,7 +122,8 @@ def get_dashboard_stats():
 
     # ✅ 總 notebook 數量
     total_notebooks = cur.execute("SELECT COUNT(*) FROM notebooks").fetchone()[0]
-
+    conn.close()
+    
     return {
         "total_notes": total_notes,
         "unique_categories": unique_categories,

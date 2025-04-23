@@ -4,24 +4,24 @@
   <!-- 🔎 篩選區（卡片樣式） -->
   <div class="snow-block bg-white rounded-xl shadow-sm px-4 py-3 flex flex-col md:flex-row md:justify-between md:items-center gap-3">
 
-    <!-- 左側：Search + Filters -->
-    <div class="flex flex-wrap gap-2 items-center flex-grow">
-      <input type="text" id="searchInput" placeholder="🔍 Search by title or tag"
-        class="px-3 py-1 border border-gray-300 rounded-lg text-sm shadow-sm flex-grow min-w-[200px]" />
+	<!-- 左側：Search + Filters -->
+	<div class="flex flex-wrap gap-2 items-center flex-grow">
+	  <input type="text" id="searchInput" placeholder="🔍 Search by title or tag"
+		class="px-3 py-1 border border-gray-300 rounded-lg text-sm shadow-sm flex-grow min-w-[200px]" />
 
-      <select id="filterCategory" class="px-2 py-1 border border-gray-300 rounded-lg text-sm shadow-sm">
-        <!-- dynamic options -->
-      </select>
+	  <!-- 新增 Notebook 選單 -->
+	  <select id="filterNotebook" class="px-2 py-1 border border-gray-300 rounded-lg text-sm shadow-sm">
+		<!-- dynamic options -->
+	  </select>
 
-      <select id="sortSelect" class="px-2 py-1 border border-gray-300 rounded-lg text-sm shadow-sm">
-        <option value="newest">📅 Newest First</option>
-        <option value="oldest">Oldest First</option>
-        <option value="az">A → Z</option>
-      </select>
+	  <select id="filterCategory" class="px-2 py-1 border border-gray-300 rounded-lg text-sm shadow-sm">
+		<!-- dynamic options -->
+	  </select>
 
-      <button id="toggleViewBtn" class="text-sm text-gray-600 hover:underline ml-2">🌓 Full</button>
-      <a href="#" id="clearFilters" class="text-sm text-blue-600 hover:underline ml-2">🧹 Clear</a>
-    </div>
+	  <button id="toggleViewBtn" class="text-sm text-gray-600 hover:underline ml-2">🌓 Full</button>
+	  <a href="#" id="clearFilters" class="text-sm text-blue-600 hover:underline ml-2">🧹 Clear</a>
+	</div>
+
 
     <!-- 右側：Limit -->
     <div id="limitBtns" class="text-sm text-gray-600 whitespace-nowrap flex gap-2 items-center">

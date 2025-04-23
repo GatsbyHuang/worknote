@@ -18,6 +18,7 @@ def get_categories():
         rows = cur.execute('SELECT id, name FROM categories ORDER BY name ASC').fetchall()
 
     categories = [{'id': row['id'], 'name': row['name']} for row in rows]
+    conn.close()
     return jsonify(categories)
 
 @categories_bp.route('/', methods=['POST'])
@@ -35,7 +36,7 @@ def add_category():
             conn.execute("INSERT INTO categories (name, notebook_id) VALUES (?, ?)", (name, notebook_id))
         except sqlite3.IntegrityError:
             return jsonify({'error': 'Category already exists'}), 409
-
+    conn.close()
     return jsonify({'status': 'ok', 'name': name}), 201
 
 @categories_bp.route('/<int:category_id>', methods=['DELETE'])
@@ -45,5 +46,5 @@ def delete_category(category_id):
         cur = conn.execute("DELETE FROM categories WHERE id = ?", (category_id,))
         if cur.rowcount == 0:
             return jsonify({'error': 'Category not found'}), 404
-
+    conn.close()
     return jsonify({'status': 'deleted', 'id': category_id}), 200

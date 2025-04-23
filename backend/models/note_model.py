@@ -47,7 +47,8 @@ def get_all_notes(limit=None, tag=None, category_id=None, userid=None, notebook_
             continue
 
         notes.append(note)
-
+    
+    conn.close()
     return notes
 
 
@@ -89,6 +90,7 @@ def create_note(data, userid):
                 userid
             )
         )
+    conn.close()
     return note_id
 
 
@@ -112,7 +114,8 @@ def update_note(note_id, data):
                 note_id
             )
         )
-        return result.rowcount > 0
+    conn.close()
+    return result.rowcount > 0
 
 
 
@@ -123,12 +126,14 @@ def update_note_category(note_id, category_id):
             "UPDATE notes SET category_id=? WHERE id=?",
             (category_id, note_id)
         )
-        return result.rowcount > 0
+    conn.close()
+    return result.rowcount > 0
 
 def delete_note(note_id):
     conn = get_db()
     with conn:
         conn.execute("UPDATE notes SET archived = 1 WHERE id = ?", (note_id,))
+    conn.close()
 
 def get_notes(limit=None, userid=None):
     conn = get_db()
@@ -147,6 +152,7 @@ def get_notes(limit=None, userid=None):
         query += f" LIMIT {limit}"
 
     rows = cur.execute(query, params).fetchall()
+    conn.close()
     return [dict(row) for row in rows]
 
 def query_notes_by_conditions(tags: List[str], category_ids: List[int], userids: List[str], mode: str, db_path=None):

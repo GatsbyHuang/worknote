@@ -118,7 +118,7 @@ def merge_notes_from_db(import_db_path, strategy='ignore'):
                 ))
                 notes_merged += 1
 
-
+    conn.close()
     return {
         'notes_merged': notes_merged,
         'categories_merged': categories_merged,
