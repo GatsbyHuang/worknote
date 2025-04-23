@@ -25,41 +25,83 @@ export function applyTheme(theme) {
   switch (theme) {
     case 'spring':
       header.classList.add('bg-pink-100');
-      sidebar.classList.add('bg-pink-50', 'backdrop-blur');
+      sidebar.classList.add('bg-gradient-to-b', 'from-pink-50', 'to-pink-100');  //漸層效果
 	  newNoteBtn.classList.add('bg-green-400', 'hover:bg-green-500');
       if (main) main.classList.add('bg-pink-50/80');
-      if (mobileHeader) mobileHeader.classList.add('bg-pink-100');  // 加這行
-	  break;
+      if (mobileHeader) mobileHeader.classList.add('bg-pink-100'); 
+	  addSeasonEffect('#season_div','🌸', 5);
+      break;
     case 'summer':
       header.classList.add('bg-sky-100');
-      sidebar.classList.add('bg-sky-50', 'backdrop-blur');
+      sidebar.classList.add('bg-gradient-to-b', 'from-sky-50', 'to-sky-100'); //漸層效果
 	  newNoteBtn.classList.add('bg-teal-400', 'hover:bg-teal-500');
       if (main) main.classList.add('bg-sky-50/80');
-	  if (mobileHeader) mobileHeader.classList.add('bg-sky-100');  // 加這行
+	  if (mobileHeader) mobileHeader.classList.add('bg-sky-100');
+      addSeasonEffect('#season_div','☀️', 5);
       break;
     case 'autumn':
       header.classList.add('bg-orange-100');
-      sidebar.classList.add('bg-orange-50', 'backdrop-blur');
+      sidebar.classList.add('bg-gradient-to-b', 'from-orange-50', 'to-orange-100'); //漸層效果
       newNoteBtn.classList.add('bg-orange-400', 'hover:bg-orange-500');
 	  if (main) main.classList.add('bg-orange-50/80');
+      if (mobileHeader) mobileHeader.classList.add('bg-orange-100');
+      addSeasonEffect('#season_div','🍂',5);
       break;
     case 'winter':
       header.classList.add('bg-blue-100');
-      sidebar.classList.add('bg-blue-50', 'backdrop-blur');
+      sidebar.classList.add('bg-gradient-to-b', 'from-blue-50', 'to-blue-100'); //漸層效果
 	  newNoteBtn.classList.add('bg-indigo-400', 'hover:bg-indigo-500');
       if (main) main.classList.add('bg-blue-50/80');
-      if (mobileHeader) mobileHeader.classList.add('bg-orange-100');  // 加這行
-	  if (mobileHeader) mobileHeader.classList.add('bg-blue-100');  // 加這行
+      if (mobileHeader) mobileHeader.classList.add('bg-orange-100');
+	  if (mobileHeader) mobileHeader.classList.add('bg-blue-100');
+      sidebar.classList.add('relative');
+      addSeasonEffect('#season_div','❄️', 5);
 	  break;
     default:
       sidebar.classList.add('bg-white');
       header.classList.add('bg-white');
 	  newNoteBtn.classList.add('bg-slate-500', 'hover:bg-slate-600');
       if (main) main.classList.add('bg-white/50');
-	  if (mobileHeader) mobileHeader.classList.add('bg-white');  // 加這行
+	  if (mobileHeader) mobileHeader.classList.add('bg-white'); 
 
   }
 }
+
+export function addSeasonEffect(selector = '.season-effect', symbol = '❄️', count = 10) {
+  const container = document.querySelector(selector);
+  if (!container) return;
+  container.innerHTML = '';
+
+  for (let i = 0; i < count; i++) {
+    const flake = document.createElement('div');  // 改 div
+    flake.className = 'flake';
+    flake.textContent = symbol;
+    flake.style.left = Math.random() * 100 + '%';
+    flake.style.animationDelay = Math.random() * 10 + 's';
+    flake.style.fontSize = `${Math.random() * 8 + 10}px`;  // 10~18px
+    flake.style.opacity = Math.random() * 0.3 + 0.1;        // 0.1 ~ 0.4
+    container.appendChild(flake);
+  }
+}
+
+
+export function addSeasonEffect_old(symbol = '❄️', count = 10) {
+  const container = document.querySelector('.season-effect');
+  if (!container) return;
+  container.innerHTML = '';
+
+  for (let i = 0; i < count; i++) {
+    const flake = document.createElement('div');
+    flake.className = 'flake';
+    flake.textContent = symbol;
+    flake.style.left = Math.random() * 100 + '%';
+    flake.style.animationDelay = Math.random() * 10 + 's';
+    flake.style.fontSize = `${Math.random() * 8 + 10}px`; // 10~18px
+    flake.style.opacity = Math.random() * 0.3 + 0.1;      // 0.1 ~ 0.4
+    container.appendChild(flake);
+  }
+}
+
 
 // 更新主題 UI
 export function updateThemeUI() {

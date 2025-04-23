@@ -11,14 +11,12 @@
 	<!-- 加上各種常見格式 fallback -->
 	<link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
 	
-
-  <style>
+<style>
   .sidebar-item.active {
     background-color: #DBEAFE; /* Tailwind: bg-blue-100 */
     font-weight: 600;          /* Tailwind: font-semibold */
     border-radius: 0.375rem;   /* Tailwind: rounded */
   }
-  
 
   #fuzzyResults li:hover {
     background-color: #f3f4f6;
@@ -30,11 +28,78 @@
     background-color: #cbd5e1; /* cool gray */
   }
 
+  /* theme 動畫效果 */
+
+#sidebar {
+  position: relative;
+  z-index: 20;  /* Sidebar 整體比雪花高 */
+}
+
+
+
+.sidebar-item {
+  position: relative; /* 開啟 z-index */
+  z-index: 30;        /* 繼承 sidebar 的層級 */
+}
+
+.sidebar-item:hover {
+  z-index: 20;        /* Hover 時更高，確保在最上層 */
+}
+
+
+#main-content {
+  position: relative;  /* ⭐️ 確保有定位層級 */
+  z-index: 10;         /* ⭐️ 高於 season_div */
+}
+
+/* 全畫面飄落效果 */
+#season_div {
+  position: fixed;       /* 固定在畫面上 */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;         /* 整個畫面 */
+  pointer-events: none;  /* 不擋住其他互動 */
+  z-index: 10;           /* 確保在內容上面，但不超過 modal */
+  overflow: hidden;      /* 飄出畫面不要顯示 */
+}
+
+
+#season_div .flake {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18px;
+  opacity: 0.5;
+  animation: snow-fall 10s linear infinite, snow-sway 4s ease-in-out infinite alternate;
+  pointer-events: none;  /* 確保不干擾點擊 */
+  mix-blend-mode: screen; /* 混色模式，遇到文字會柔和融合 */
+  z-index: 10;  /* 飄在 content 前面，但在 sidebar 項目後面 */
+}
+
+
+@keyframes snow-fall {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(100vh); } /* 讓雪花落到底 */
+}
+
+@keyframes snow-sway {
+  0% { margin-left: 0; }
+  100% { margin-left: 20px; }
+}
+
+
+
+
+
 </style>
+
 
 </head>
 <body class="text-gray-800 font-sans h-screen bg-gray-50">
-
+       <!-- 雪花效果放這 -->
+  <div id="season_div" class="season-effect"></div>  <!-- 🌸 飄落物 -->
   <!-- Mobile Top Bar -->
   <div  id="mobile-header" class="lg:hidden flex justify-between items-center bg-white px-4 py-2 shadow-md">
 	<div class="flex items-center gap-2">
@@ -46,6 +111,7 @@
       </svg>
     </button>
   </div>
+
 
 	<!-- Desktop Top Bar -->
 <header class="hidden lg:flex justify-between items-center bg-white px-6 py-1.5 shadow-lg/40 z-10">
@@ -81,13 +147,18 @@
 
   <!-- Main Layout -->
   <div class="flex h-[calc(100vh-56px)]">
+
+  
+
     <!-- Sidebar -->
 <aside id="sidebar"
-  class="w-64 bg-white shadow-xl rounded-r-3xl p-4 overflow-y-auto transition-all duration-300 ease-in-out hidden lg:block">
-<nav class="flex flex-col gap-2 text-sm text-gray-700 mt-2">
+  class="w-64 bg-white shadow-xl rounded-r-3xl p-4 overflow-y-auto transition-all duration-300 ease-in-out hidden lg:block"
+  style="position: relative; overflow: hidden;">
 
+
+  <!-- Sidebar 選單 -->
+  <nav class="flex flex-col gap-2 text-sm text-gray-700 mt-2">
     <!-- 常規項目 -->
-    
     <a href="#dashboard" class="sidebar-item flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-gray-200 transition-all duration-200 ease-in-out">
       <i data-lucide="home" class="w-4 h-4 text-blue-500"></i><span>Dashboard</span>
     </a>
@@ -95,7 +166,7 @@
       <i data-lucide="list" class="w-4 h-4 text-green-500"></i><span>All Notes</span>
     </a>
 
-	<!-- Notes Tree 與 Notebook -->
+    <!-- Notes Tree 與 Notebook -->
     <details open>
       <summary class="cursor-pointer flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
         <i data-lucide="tree-deciduous" class="w-4 h-4 text-yellow-500"></i><span>Notes Tree</span>
@@ -103,13 +174,10 @@
       <div class="ml-8 mt-2 flex flex-col gap-1" data-notebook-list>
         <!-- Notebook list -->
       </div>
-      <!-- 🔘 Add Button -->
-      <button id="addNotebookBtn"
-          class="ml-8 mt-2 flex items-center gap-1 text-xs text-gray-500 hover:text-blue-600 hover:underline focus:outline-none transition">
-          <i data-lucide="plus" class="w-4 h-4"></i> Add Notebook
-        </button>
+      <button id="addNotebookBtn" class="ml-8 mt-2 flex items-center gap-1 text-xs text-gray-500 hover:text-blue-600 hover:underline focus:outline-none transition">
+        <i data-lucide="plus" class="w-4 h-4"></i> Add Notebook
+      </button>
     </details>
-
 
     <!-- 匯入/匯出 -->
     <a href="#export" class="sidebar-item flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-gray-200 transition-all duration-200 ease-in-out">
@@ -120,6 +188,7 @@
     </a>
   </nav>
 </aside>
+
 
 
 
