@@ -89,7 +89,7 @@
 
 
 	<!-- Desktop Top Bar -->
-<header class="hidden lg:flex justify-between items-center bg-white px-6 py-1.5 shadow-lg/40 z-10">
+<header class="hidden lg:flex justify-between items-center bg-white px-6 py-2 shadow-md rounded-b-2xl z-20">
 	  <div class="flex items-center gap-3">
 		<!-- Sidebar Toggle Button -->
 		<button id="sidebarToggleBtn" class="text-gray-500 hover:text-blue-500 transition">
@@ -121,14 +121,13 @@
 	</header>
 
   <!-- Main Layout -->
-  <div class="flex h-[calc(100vh-56px)]">
+  <div class="flex h-[calc(100vh-56px)]  ">
 
   
 
     <!-- Sidebar -->
 <aside id="sidebar"
-  class="w-64 bg-white shadow-xl rounded-r-3xl p-4 overflow-y-auto transition-all duration-300 ease-in-out hidden lg:block"
-  style="position: relative; overflow: hidden;">
+  class="w-64 bg-white shadow-lg rounded-r-3xl p-4 overflow-y-auto transition-all duration-300 ease-in-out hidden lg:block z-10 border border-gray-100">
 
 
   <!-- Sidebar 選單 -->
@@ -167,10 +166,21 @@
 
 
 
-    <!-- Main Content -->
-    <main id="main-content" class="flex-1 p-6 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
+  <!-- Main Content -->
+
+  <main id="main-content" class="flex-1 p-6 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
       <div class="text-gray-400">Loading...</div>
     </main>
+
+  <!-- 🔄 Page Loading Spinner -->
+  <div id="pageLoading" class="absolute inset-0 bg-white bg-opacity-60 flex items-center justify-center hidden z-40">
+    <div class="text-center text-gray-600 text-sm">
+      <div class="animate-spin h-6 w-6 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+      Loading...
+    </div>
+  </div>
+
+
   </div>
 
   <!-- Floating New Note Button -->
@@ -305,12 +315,6 @@
 	  <button onclick="document.getElementById('versionBanner').classList.add('hidden')" class="ml-2 text-gray-500 hover:text-gray-700">✖</button>
 	</div>
 
-	<div id="pageLoading" class="fixed inset-0 z-50 bg-white bg-opacity-70 flex items-center justify-center hidden">
-	  <div class="text-center text-gray-600 text-sm">
-		<div class="animate-spin h-6 w-6 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
-		Loading...
-	  </div>
-	</div>
 	
 	<div id="downloadSpinner" class="z-[1000] fixed top-4 right-4 flex items-center gap-2 bg-white border border-gray-300 rounded px-3 py-2 shadow text-gray-700 text-sm hidden">
 	  <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

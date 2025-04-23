@@ -16,7 +16,6 @@ const Router = {
     const basePath = path.split('?')[0];
     const query = new URLSearchParams(path.split('?')[1] || '');
     const mainContent = document.getElementById('main-content');
-
     try {
       // 🔄 Loading indicator
       this.showLoading();
@@ -72,27 +71,20 @@ const Router = {
     }
   },
 
-  showLoading() {
-    let el = document.getElementById('pageLoading');
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'pageLoading';
-      el.className = 'fixed inset-0 z-50 bg-white/60 flex items-center justify-center';
-      el.innerHTML = `
-        <div class="text-center text-gray-500 text-sm">
-          <div class="animate-spin h-6 w-6 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
-          Loading...
-        </div>`;
-      document.body.appendChild(el);
-    } else {
-      el.classList.remove('hidden');
-    }
-  },
+	showLoading() {
+	  const el = document.getElementById('pageLoading');
+	  if (el) {
+		el.classList.remove('hidden');  // 只控制顯示
+	  }
+	},
 
-  hideLoading() {
-    const el = document.getElementById('pageLoading');
-    if (el) el.classList.add('hidden');
-  },
+	hideLoading() {
+	  const el = document.getElementById('pageLoading');
+	  if (el) {
+		el.classList.add('hidden');  // 控制隱藏
+	  }
+	},
+
   
   disableMenuItems(disabled = true) {
 	document.querySelectorAll('.sidebar-item').forEach(btn => {

@@ -111,15 +111,14 @@ async function loadNotebookStats() {
     const res = await fetch('/api/notebook_stats');
     const notebooks = await res.json();
 
-
     const container = document.getElementById('notebookAnalysis');
-    container.innerHTML = '';  // 清空舊內容
+    container.innerHTML = ''; // 清空舊內容
 
     notebooks.forEach(nb => {
-		const lastUpdatedHTML = nb.last_updated
-		  ? `<div>Last Updated: ${formatRelativeTime(nb.last_updated)}</div>`  // 用人性化時間
-		  : '';
-		
+      const lastUpdatedHTML = nb.last_updated
+        ? `Last Updated: ${formatRelativeTime(nb.last_updated)}`
+        : '';
+
       const tagsHTML = nb.tags.map(tag =>
         `<li class="flex justify-between">
           <span>${tag.name}</span>
@@ -133,39 +132,39 @@ async function loadNotebookStats() {
         </li>`).join('');
 
       const cardHTML = `
-      <div class="rounded-xl border border-gray-200 p-4 bg-white space-y-4">
-		<div class="flex items-center gap-2">
-		  <i data-lucide="book-open" class="w-5 h-5 text-indigo-500"></i>
-		  <a href="#notetree?notebook=${nb.id}" class="font-semibold text-gray-700 text-lg hover:underline">
-			${nb.name}
-		  </a>
-		</div>
-        <div class="grid grid-cols-2 gap-4">
+      <div class="rounded-xl border border-gray-200 p-4 bg-white flex flex-col h-full">
+        <div class="flex items-center gap-2 mb-2">
+          <i data-lucide="book-open" class="w-5 h-5 text-indigo-500"></i>
+          <a href="#notetree?notebook=${nb.id}" class="font-semibold text-gray-700 text-lg hover:underline">
+            ${nb.name}
+          </a>
+        </div>
+        <div class="grid grid-cols-2 gap-4 flex-grow">
           <div>
-            <div class="text-gray-500 text-sm mb-1 flex items-center gap-1">
+            <div class="text-gray-500 text-sm mb-1 flex items-center gap-1 uppercase tracking-wide font-semibold">
               <i data-lucide="tag" class="w-4 h-4"></i> Tags
             </div>
             <ul class="space-y-1">${tagsHTML}</ul>
           </div>
           <div>
-            <div class="text-gray-500 text-sm mb-1 flex items-center gap-1">
+            <div class="text-gray-500 text-sm mb-1 flex items-center gap-1 uppercase tracking-wide font-semibold">
               <i data-lucide="layers" class="w-4 h-4"></i> Categories
             </div>
             <ul class="space-y-1">${categoriesHTML}</ul>
           </div>
         </div>
-        <div class="flex justify-between items-center text-xs text-gray-500 pt-2 border-t border-dashed">
+        <div class="flex justify-between items-center text-xs text-gray-500 pt-2 border-t border-dashed mt-2">
           <div class="flex items-center gap-1 text-blue-600">
             <i data-lucide="file-text" class="w-4 h-4"></i> ${nb.total_notes} Notes
           </div>
-          <div> ${lastUpdatedHTML}</div>
+          <div>${lastUpdatedHTML}</div>
         </div>
       </div>`;
 
       container.insertAdjacentHTML('beforeend', cardHTML);
     });
 
-    lucide.createIcons();  // 重新渲染 lucide icons
+    lucide.createIcons(); // 重新渲染 lucide icons
   } catch (err) {
     console.error('❌ 無法載入 Notebook Stats:', err);
   }
