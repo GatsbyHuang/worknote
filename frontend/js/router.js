@@ -1,4 +1,5 @@
 // js/router.js
+//import PageState from './pages/pagestate.js';
 
 const Router = {
   beforeHooks: [],
@@ -31,6 +32,8 @@ const Router = {
 
       const content = await res.text();
       mainContent.innerHTML = content;
+	  // ✅ Reset PageState（解鎖其它頁面）
+	  //PageState.unlockOther(basePath);
       window.history.pushState({}, '', `#${path}`);
 
       // 📦 Try load module

@@ -1,5 +1,5 @@
 // notetree.js - for note-browser.html
-import { bindOnce, showDownloadSpinner, hideDownloadSpinner } from './utils.js';
+import { bindOnce, showDownloadSpinner, hideDownloadSpinner,updateHashParam } from './utils.js';
 
 let currentCategory = null;
 let currentNotebookId = null;
@@ -16,7 +16,10 @@ export async function init() {
   currentNotebookId = params.get('notebook');
   const preloadNoteId = sessionStorage.getItem('currentNoteId');
   const preloadCategoryId = params.get('category');
-   console.log('preloadNoteId:', preloadNoteId);
+
+  if (preloadCategoryId) {
+	sessionStorage.setItem('currentCategoryId', preloadCategoryId);  // ✅ 記錄 category
+   }
   await import('./notetree-drag.js').then(m => m.init());
   preview = await import('./notetree-preview.js');
 
@@ -282,6 +285,11 @@ function setActiveNote(noteId) {
 
 async function selectSection(categoryId, noteToSelect = null) {
   currentCategory = categoryId;
+  sessionStorage.setItem('currentCategoryId', categoryId);
+    // ✅ 更新 URL ,保持refresh後頁面一致
+  const notebookId = currentNotebookId;
+  updateHashParam('category', categoryId);
+  
   setActiveSection(categoryId);
 
   const notes = await fetchNotesByCategory(categoryId);

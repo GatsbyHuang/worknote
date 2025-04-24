@@ -92,6 +92,10 @@ async function openEditorModal() {
   try {
     const html = await fetch('/pages/note-editor.html').then(res => res.text());
     container.innerHTML = html;
+	
+	// ⛑️ 每次開 editor modal 前，解鎖 page state
+    //const PageState = (await import('/js/pages/pagestate.js')).default;
+    //PageState.unlock('note-editor');
 
     const module = await import('/js/pages/note-editor.js');
     await module.init();
