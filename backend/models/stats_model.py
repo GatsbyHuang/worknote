@@ -60,8 +60,10 @@ def get_notebook_stats():
 
             # Last Updated
             note_updated = note['updated_at']
-            if not last_updated or note_updated > last_updated:
-                last_updated = note_updated
+            if note_updated:  # 加這層防呆
+                if not last_updated or note_updated > last_updated:
+                    last_updated = note_updated
+
 
         results.append({
             "name": notebook_name,
