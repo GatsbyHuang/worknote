@@ -1,4 +1,5 @@
 import Fuse from 'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.esm.min.js';
+import { showToast  } from './utils.js';
 
 let includeArchived = false;  // 預設不含 archived 筆記
 
@@ -30,16 +31,24 @@ export async function init() {
 
   renderLimitButtons(allNotes.length);
   
-    document.getElementById('toggleArchived').addEventListener('click', () => {
-      includeArchived = !includeArchived;
+	document.getElementById('toggleArchived').addEventListener('click', () => {
+	  includeArchived = !includeArchived;
 
-      const btn = document.getElementById('toggleArchived');
-      btn.classList.toggle('text-blue-600', includeArchived);  // 切換顏色
-      btn.textContent = includeArchived ? '📂' : '🗃️';        // 切換 icon
-      btn.title = includeArchived ? 'Viewing Archived Notes' : 'Show Archived Notes';
+	  const btn = document.getElementById('toggleArchived');
+	  btn.classList.toggle('text-blue-600', includeArchived);
+	  btn.textContent = includeArchived ? '📂' : '🗃️'; 
+	  btn.title = includeArchived ? 'Viewing Archived Notes' : 'Show Archived Notes';
 
-      applyFilters();  // 重新篩選
-    });
+	  applyFilters();
+
+
+	  if (includeArchived) {
+		showToast('Viewing Archived Notes 📂', 'page');
+	  } else {
+		showToast('Showing Active Notes 🗃️', 'page');
+	  }
+	});
+
 
   
   await loadNotebooks();
@@ -149,25 +158,7 @@ export async function init() {
     return rtf.format(-Math.floor(diffSec / 86400), 'day');
   }
 
-	function showToast(message) {
-	  const toast = document.createElement('div');
-	  toast.className = `fixed top-4 right-4 bg-white text-gray-800 border border-gray-300 px-4 py-2 rounded-xl shadow-md opacity-0 transform translate-y-[-10px] transition-all text-sm`;
-	  toast.style.zIndex = 9999;
-	  toast.innerHTML = `<span class="inline-block align-middle">${message}</span>`;
-	  document.body.appendChild(toast);
-	  requestAnimationFrame(() => {
-		toast.classList.remove('opacity-0');
-		toast.classList.remove('translate-y-[-10px]');
-		toast.classList.add('opacity-100');
-		toast.classList.add('translate-y-0');
-	  });
-	  setTimeout(() => {
-		toast.classList.remove('opacity-100');
-		toast.classList.add('opacity-0');
-		toast.classList.add('translate-y-[-10px]');
-		setTimeout(() => toast.remove(), 300);
-	  }, 3000);
-	}
+
 
   function renderNotes(notes) {
     listContainer.innerHTML = '';
@@ -244,7 +235,7 @@ export async function init() {
           if (res.ok) {
             allNotes = allNotes.filter(n => n.id !== note.id);
             applyFilters();
-            showToast('✅ 筆記已刪除');
+            showToast('note.delete', 'delete', note.title );
           }
         }
       });
