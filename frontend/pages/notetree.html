@@ -16,6 +16,27 @@
   z-index: 20;         /* ⭐️ 保證內容在雪花之上 */
 }
 
+/* Tailwind custom utility */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+#sectionItemsWrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+#sectionItemsWrapper::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+#sectionItemsWrapper::-webkit-scrollbar {
+  display: none;
+}
+
+#sectionItemsWrapper:hover::-webkit-scrollbar {
+  display: block;
+}
+
 
 </style>
 
@@ -26,10 +47,18 @@
 
 	<!-- Horizontal Category Tabs -->
 	<div class="mb-1">
-	  <div
-		class="flex items-center gap-2 overflow-x-auto bg-white px-4 py-3 border border-gray-200 rounded-xl shadow-sm"
-		id="sectionItemsWrapper"
-	  >
+		<div
+		  class="flex items-center gap-2 overflow-x-auto bg-white px-4 py-3 border border-gray-200 rounded-xl shadow-sm scrollbar-hide"
+		  id="sectionItemsWrapper"
+		>
+
+		<!-- Category 標題區 -->
+		<h2 class="flex items-center gap-2 text-sm font-semibold text-gray-700 flex-shrink-0">
+		  <i data-lucide="folder" class="w-4 h-4 text-blue-500"></i>
+		  Category
+		</h2>
+
+		<!-- 既有按鈕們 -->
 		<div id="sectionItems" class="flex items-center gap-2 whitespace-nowrap">
 		  <!-- Category tab buttons will be dynamically inserted here -->
 		</div>
@@ -38,6 +67,7 @@
 		</button>
 	  </div>
 	</div>
+
 
   <!-- Main Content Area -->
   <div class="flex flex-col md:flex-row flex-1 gap-2">
