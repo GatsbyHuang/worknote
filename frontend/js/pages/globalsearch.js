@@ -111,7 +111,6 @@ function initFuzzyModal() {
   const inputEl = document.getElementById('fuzzySearchInput');
 
   document.getElementById('globalSearchBtn')?.addEventListener('click', async () => {
-	console.log("click treigger")
     document.getElementById('fuzzyModal').classList.remove('hidden');
     inputEl.focus();
 
