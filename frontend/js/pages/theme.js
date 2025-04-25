@@ -1,6 +1,8 @@
 // ===== theme.js =====
 import { initUserHandler } from './user.js';  // ⬅️ 引入主題
 
+let idleTimer = null;
+let isIdle = false;
 // 取得當前主題
 export function getTheme() {
   return sessionStorage.getItem('selectedTheme') || localStorage.getItem('selectedTheme') || 'default';
@@ -14,81 +16,58 @@ export function applyTheme(theme) {
   const main = document.getElementById('main-content');
   const newNoteBtn = document.getElementById('newNoteBtn');
 
-  // 清除原有背景樣式
   sidebar.className = 'w-64 p-4 overflow-y-auto hidden lg:block transition-all duration-300 ease-in-out';
   header.className = 'hidden lg:flex justify-between items-center px-6 py-1.5 shadow-sm';
   newNoteBtn.className = 'fixed bottom-6 right-6 z-50 text-white p-4 rounded-full shadow-md focus:outline-none transition-all';
   if (mobileHeader) mobileHeader.className = 'lg:hidden flex justify-between items-center px-4 py-2 shadow-md';
   if (main) main.className = 'flex-1 p-4 overflow-y-auto';
 
-  // 加上主題樣式
   switch (theme) {
     case 'spring':
-      //header.classList.add('bg-pink-100');
-      header.classList.add('bg-gradient-to-r', 'from-pink-200', 'to-pink-100');  //漸層效果
-      //sidebar.classList.add('bg-gradient-to-b', 'from-pink-50', 'to-pink-100');  //漸層效果
+      header.classList.add('bg-gradient-to-r', 'from-pink-200', 'to-pink-100');
       sidebar.classList.add('bg-pink-100');
-	  newNoteBtn.classList.add('bg-green-400', 'hover:bg-green-500');
-      //if (main) main.classList.add('bg-pink-50/80');
-      if (main) main.classList.add('bg-gradient-to-br', 'from-pink-50', 'to-pink-100');  //漸層效果
+      newNoteBtn.classList.add('bg-green-400', 'hover:bg-green-500');
+      if (main) main.classList.add('bg-gradient-to-br', 'from-pink-50', 'to-pink-100');
       if (mobileHeader) mobileHeader.classList.add('bg-pink-100'); 
-	  addSeasonEffect('#season_div','🌸', 5);
+      addSeasonEffect('#season_div','🌸', 5);
       break;
     case 'summer':
       header.classList.add('bg-gradient-to-r', 'from-sky-200', 'to-sky-100');
       sidebar.classList.add('bg-sky-100');
-	  newNoteBtn.classList.add('bg-teal-400', 'hover:bg-teal-500');
-      if (main) main.classList.add('bg-gradient-to-br', 'from-sky-50', 'to-sky-100');  //漸層效果
-	  if (mobileHeader) mobileHeader.classList.add('bg-sky-100');
+      newNoteBtn.classList.add('bg-teal-400', 'hover:bg-teal-500');
+      if (main) main.classList.add('bg-gradient-to-br', 'from-sky-50', 'to-sky-100');
+      if (mobileHeader) mobileHeader.classList.add('bg-sky-100');
       addSeasonEffect('#season_div','☀️', 5);
       break;
     case 'autumn':
       header.classList.add('bg-gradient-to-r', 'from-orange-200', 'to-orange-100');
       sidebar.classList.add('bg-orange-100');
       newNoteBtn.classList.add('bg-orange-400', 'hover:bg-orange-500');
-	  if (main) main.classList.add('bg-gradient-to-br', 'from-orange-50', 'to-orange-100');  //漸層效果
+      if (main) main.classList.add('bg-gradient-to-br', 'from-orange-50', 'to-orange-100');
       if (mobileHeader) mobileHeader.classList.add('bg-orange-100');
       addSeasonEffect('#season_div','🍂',5);
       break;
     case 'winter':
       header.classList.add('bg-gradient-to-r', 'from-blue-200', 'to-blue-100');
       sidebar.classList.add('bg-blue-100');
-	  newNoteBtn.classList.add('bg-indigo-400', 'hover:bg-indigo-500');
-      if (main) main.classList.add('bg-gradient-to-br', 'from-blue-50', 'to-blue-100');  //漸層效果
+      newNoteBtn.classList.add('bg-indigo-400', 'hover:bg-indigo-500');
+      if (main) main.classList.add('bg-gradient-to-br', 'from-blue-50', 'to-blue-100');
       if (mobileHeader) mobileHeader.classList.add('bg-blue-100');
-      sidebar.classList.add('relative');
       addSeasonEffect('#season_div','❄️', 5);
-	  break;
+      break;
     default:
       sidebar.classList.add('bg-white');
       header.classList.add('bg-white');
-	  newNoteBtn.classList.add('bg-slate-500', 'hover:bg-slate-600');
+      newNoteBtn.classList.add('bg-slate-500', 'hover:bg-slate-600');
       if (main) main.classList.add('bg-white/50');
-	  if (mobileHeader) mobileHeader.classList.add('bg-white'); 
-
+      if (mobileHeader) mobileHeader.classList.add('bg-white'); 
   }
+
+  setupIdleCharacter();  // ⭐ 加入閒置動畫
 }
 
 export function addSeasonEffect(selector = '.season-effect', symbol = '❄️', count = 10) {
   const container = document.querySelector(selector);
-  if (!container) return;
-  container.innerHTML = '';
-
-  for (let i = 0; i < count; i++) {
-    const flake = document.createElement('div');  // 改 div
-    flake.className = 'flake';
-    flake.textContent = symbol;
-    flake.style.left = Math.random() * 100 + '%';
-    flake.style.animationDelay = Math.random() * 10 + 's';
-    flake.style.fontSize = `${Math.random() * 8 + 10}px`;  // 10~18px
-    flake.style.opacity = Math.random() * 0.3 + 0.1;        // 0.1 ~ 0.4
-    container.appendChild(flake);
-  }
-}
-
-
-export function addSeasonEffect_old(symbol = '❄️', count = 10) {
-  const container = document.querySelector('.season-effect');
   if (!container) return;
   container.innerHTML = '';
 
@@ -98,11 +77,67 @@ export function addSeasonEffect_old(symbol = '❄️', count = 10) {
     flake.textContent = symbol;
     flake.style.left = Math.random() * 100 + '%';
     flake.style.animationDelay = Math.random() * 10 + 's';
-    flake.style.fontSize = `${Math.random() * 8 + 10}px`; // 10~18px
-    flake.style.opacity = Math.random() * 0.3 + 0.1;      // 0.1 ~ 0.4
+    flake.style.fontSize = `${Math.random() * 8 + 10}px`;
+    flake.style.opacity = Math.random() * 0.3 + 0.1;
     container.appendChild(flake);
   }
 }
+
+// 🐾 加入閒置角色
+export function setupIdleCharacter() {
+  const character = document.getElementById('seasonCharacter');
+  if (!character) return;
+
+  function resetIdleTimer() {
+    clearTimeout(idleTimer);
+    isIdle = false;  // 停止動物出現
+    idleTimer = setTimeout(() => {
+      isIdle = true;
+      triggerIdleCharacter();  // 開始第一隻
+    }, 60000);  // 10 秒 idle
+  }
+
+  ['mousemove', 'keydown', 'click'].forEach(event => {
+    window.addEventListener(event, resetIdleTimer);
+  });
+
+  resetIdleTimer();
+}
+
+export function triggerIdleCharacter() {
+  if (!isIdle) return;  // ❌ 如果不是 idle，不要出現動物
+
+  const character = document.getElementById('seasonCharacter');
+  const theme = sessionStorage.getItem('selectedTheme') || 'default';
+  const themeCharacters = {
+    spring: ['🐇', '🐿️', '🦆', '🐤', '🐝'],
+    summer: ['🦎', '🐢', '🐓', '🦩', '🦀'],
+    autumn: ['🦔', '🦃', '🐕‍🦺', '🦉', '🦌'],
+    winter: ['🐧', '🐻‍❄️', '🦊', '🦢', '🦦'],
+    default: ['🐾']
+  };
+
+  const animals = themeCharacters[theme] || themeCharacters['default'];
+  const chosenAnimal = animals[Math.floor(Math.random() * animals.length)];
+  character.textContent = chosenAnimal;
+
+  // 重新啟動動畫
+  character.classList.remove('walking');
+  void character.offsetWidth;
+  character.classList.add('walking');
+
+  // 監聽動畫結束，觸發下一隻
+  character.addEventListener('animationend', onEnd, { once: true });
+
+  function onEnd() {
+    if (isIdle) {
+      setTimeout(triggerIdleCharacter, 1000);  // 下一隻延遲一點點再出
+    }
+  }
+}
+
+
+
 
 
 // 更新主題 UI
@@ -126,7 +161,7 @@ export function initThemeHandler() {
       localStorage.setItem('selectedTheme', theme);
       sessionStorage.setItem('selectedTheme', theme);
       applyTheme(theme);
-	  initUserHandler()
+      initUserHandler();
       modal.classList.add('hidden');
     });
   });
