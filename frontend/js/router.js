@@ -1,6 +1,9 @@
 // js/router.js
 //import PageState from './pages/pagestate.js';
 
+import { showToast } from './pages/utils.js';	
+
+
 const Router = {
   beforeHooks: [],
   afterHooks: [],
@@ -34,7 +37,7 @@ const Router = {
       mainContent.innerHTML = content;
 	  // ✅ Reset PageState（解鎖其它頁面）
 	  //PageState.unlockOther(basePath);
-      window.history.pushState({}, '', `#${path}`);
+      window.history.replaceState({}, '', `#${path}`);
 
       // 📦 Try load module
       let module = null;
@@ -56,7 +59,11 @@ const Router = {
 
       // 🔸 Global after hooks
       for (const hook of this.afterHooks) await hook(path);
-
+	 
+	  // ✅ Page Load Toast（新增這塊）
+	  const basePathKey = basePath.replace('-', '');
+	  showToast(`page.${basePathKey}`,'page');
+	  
     } catch (err) {
       console.error('[router] Page load failed:', err);
       mainContent.innerHTML = `
@@ -124,7 +131,7 @@ const Router = {
 	};
 
 	window.addEventListener('hashchange', load);
-	window.addEventListener('popstate', load);
+	//window.addEventListener('popstate', load);
   }
 };
 

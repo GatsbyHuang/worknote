@@ -23,10 +23,23 @@ export function clearSelect(selectElement, placeholder = 'Select...') {
 }
 
 export function showToast(actionOrMessage, type = 'info', name = '') {
+  // 🌸 根據季節主題，決定 page 顏色
+  function getPageThemeClass() {
+    const pageThemes = {
+      spring: 'bg-pink-100 text-pink-800 border-pink-300',
+      summer: 'bg-sky-100 text-sky-800 border-sky-300',
+      autumn: 'bg-orange-100 text-orange-800 border-orange-300',
+      winter: 'bg-blue-100 text-blue-800 border-blue-300'
+    };
+    const selectedTheme = sessionStorage.getItem('selectedTheme');
+    return pageThemes[selectedTheme] || 'bg-white text-gray-800 border-gray-300';  // 🟢 預設白色
+  }
+
   const typeColors = {
     info: 'bg-white text-gray-800 border-gray-300',
     success: 'bg-green-100 text-green-800 border-green-300',
-    error: 'bg-red-100 text-red-800 border-red-300'
+    error: 'bg-red-100 text-red-800 border-red-300',
+    page: getPageThemeClass()  // 🌸 主題色在這裡！
   };
 
   const typeMap = {
@@ -39,14 +52,14 @@ export function showToast(actionOrMessage, type = 'info', name = '') {
   let message = actionOrMessage;
   let finalType = type;
 
-  // 判斷是否使用 action 格式
+  // 判斷是否是 action 格式
   if (actionOrMessage.includes('.')) {
     const { message: formattedMsg, type: mappedType } = formatToast(actionOrMessage, type, name);
     message = formattedMsg;
-    finalType = mappedType;  // 可能是 add/delete/update/info
+    finalType = mappedType;  // 可能是 add/delete/update/page
   }
 
-  const colorClass = typeColors[typeMap[finalType] || 'info'];
+  const colorClass = typeColors[finalType] || typeColors['info'];
 
   // ✅ 建立 toast DOM
   const toast = document.createElement('div');
@@ -67,12 +80,18 @@ export function showToast(actionOrMessage, type = 'info', name = '') {
   }, 3000);
 }
 
+
 export function formatToast(action, type, name) {
   const emojis = {
     add: ['✨', '🆕', '🎉'],
     delete: ['🗑️', '🚮', '❌'],
     update: ['💾', '🔄', '✅'],
-    info: ['ℹ️', '🔔']
+    info: ['ℹ️', '🔔'],
+    page_dashboard: ['📊', '📈', '🧭', '🎯', '🚀'],
+    page_history: ['📜', '📝', '📚', '📂', '🗂️'],
+    page_notetree: ['🌳', '🗂️', '📝', '📄', '✏️'],
+    page_export: ['📦', '💾', '📤', '📑'],
+    page_import: ['📥', '📂', '🔄', '🛠️']
   };
 
   const messages = {
@@ -95,15 +114,36 @@ export function formatToast(action, type, name) {
     'note.update': [
       `Note "${name}" saved.`,
       `Updated note "${name}".`
+    ],
+    'page.dashboard': [
+      'Dashboard ready to explore!',
+      'All systems go on the dashboard!'
+    ],
+    'page.history': [
+      'History page loaded!',
+      'Explore your notes history!'
+    ],
+    'page.notetree': [
+      'Notebook loaded!',
+      'Navigate your notebook!'
+    ],
+    'page.export': [
+      'Export page ready!',
+      'Prepare your data for export!'
+    ],
+    'page.import': [
+      'Import page ready!',
+      'Let’s bring in some data!'
     ]
   };
 
-  const typeGroup = type || 'info';
+  const isPageAction = action.startsWith('page.');
+  const typeGroup = isPageAction ? `page_${action.split('.')[1]}` : (type || 'info');
   const emojiList = emojis[typeGroup] || ['ℹ️'];
   const messageList = messages[action] || ['Action completed!'];
 
   const emoji = emojiList[Math.floor(Math.random() * emojiList.length)];
   const message = `${emoji} ${messageList[Math.floor(Math.random() * messageList.length)]}`;
 
-  return { message, type: typeGroup };
+  return { message, type: isPageAction ? 'page' : typeGroup };
 }
