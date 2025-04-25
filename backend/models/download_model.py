@@ -14,7 +14,7 @@ def get_common_pdf_styles():
     .note-content { font-size: 9pt; margin-bottom: 15px; }
     .note-content, .note-content * { word-wrap: break-word; word-break: break-word; white-space: normal; }
     .note-meta { font-size: 8pt; color: #555; margin-bottom: 20px; }
-    pre, code { font-family: monospace; background: #f5f5f5; padding: 3px; border-radius: 3px; font-size: 8.5pt; }
+    pre, code { font-family: monospace; background: #f5f5f5; padding: 3px; border-radius: 3px; font-size: 8.5pt; white-space: pre-wrap; }
     .toc { page-break-after: always; }
     .toc h2 { font-size: 16pt; color: #800000; font-style: italic; margin-bottom: 15px; text-transform: uppercase; }
     .toc ul { list-style-type: none; padding-left: 0; font-size: 10pt; }
@@ -22,14 +22,21 @@ def get_common_pdf_styles():
     .toc .toc-category { font-weight: bold; margin-top: 8px; }
     .toc .toc-note { margin-left: 15px; }
     img { max-width: 100%; height: auto; display: block; margin: 5px auto; border: 1px solid #ccc; padding: 3px; background: #f9f9f9; }
-    table { border-collapse: collapse; width: 100%; table-layout: fixed; word-break: break-word; font-size: 8.5pt; }
-    td, th { border: 1px solid #aaa; padding: 3px 5px; word-break: break-word; }
+
+    /* === 強化 Table 避免超出邊界 === */
+    table { border-collapse: collapse; width: 100% !important; table-layout: auto; font-size: 8.5pt; word-break: break-word; }
+    td, th { border: 1px solid #aaa; padding: 3px 5px; word-break: break-word; vertical-align: top; }
     th { background-color: #f0f0f0; font-weight: bold; text-align: left; }
     tr:nth-child(even) { background-color: #fafafa; }
+
+    /* 針對 colgroup 和 col 標籤移除固定寬度 */
+    colgroup col { width: auto !important; }
+
     strong { font-weight: bold; }
     em { font-style: italic; }
     </style>
     '''
+
 
 
 def generate_note_pdf(note_id):
@@ -90,6 +97,7 @@ def generate_notebook_pdf(notebook_id):
         SELECT id, title, content, tags, category_id, created_at
         FROM notes
         WHERE category_id IN (SELECT id FROM categories WHERE notebook_id = ?)
+         AND archived = 0
         ORDER BY category_id, datetime(created_at)
     ''', (notebook_id,)).fetchall()
     conn.close()
