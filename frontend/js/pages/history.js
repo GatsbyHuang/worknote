@@ -1,5 +1,8 @@
 import Fuse from 'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.esm.min.js';
 
+let includeArchived = false;  // 預設不含 archived 筆記
+
+
 export async function onBefore() {
   console.log('[📜] History 頁面載入中...');
 }
@@ -18,7 +21,7 @@ export async function init() {
   let fuse = null;
 
   try {
-    const res = await fetch('/api/notes');
+    const res = await fetch('/api/notes?include_archived=1');
     allNotes = await res.json();
     initFuzzySearchAsync(); // Lazy 初始化 Fuse
   } catch (err) {
@@ -26,6 +29,19 @@ export async function init() {
   }
 
   renderLimitButtons(allNotes.length);
+  
+    document.getElementById('toggleArchived').addEventListener('click', () => {
+      includeArchived = !includeArchived;
+
+      const btn = document.getElementById('toggleArchived');
+      btn.classList.toggle('text-blue-600', includeArchived);  // 切換顏色
+      btn.textContent = includeArchived ? '📂' : '🗃️';        // 切換 icon
+      btn.title = includeArchived ? 'Viewing Archived Notes' : 'Show Archived Notes';
+
+      applyFilters();  // 重新篩選
+    });
+
+  
   await loadNotebooks();
 
 
@@ -187,10 +203,14 @@ export async function init() {
       } catch (err) {
         console.warn('[⚠️ tag parse failed]', note.tags, err);
       }
-
+    // 判斷 archived 標籤
+     const archivedBadge = note.archived
+      ? `<span class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded">🗃️ Archived</span>`
+      : '';
+      
       li.innerHTML = `
         <div class="flex justify-between items-center flex-wrap gap-2 text-xs">
-          <div class="flex flex-wrap gap-2 items-center">${notebook} ${category} ${tagHTML}</div>
+          <div class="flex flex-wrap gap-2 items-center">${archivedBadge}${notebook} ${category} ${tagHTML}</div>
           <div class="flex items-center gap-2 whitespace-nowrap">
             <button class="text-blue-500 hover:underline edit-btn">✏️ Edit</button>
             <button class="text-red-500 hover:underline delete-btn">🗑 Delete</button>
@@ -278,6 +298,13 @@ export async function init() {
     if (category) {
       result = result.filter(note => String(note.category_id) === category);
     }
+    
+      // 🗃️ filter archived
+      if (includeArchived) {
+        result = result.filter(note => note.archived === 1);  // 只看 archived
+      } else {
+        result = result.filter(note => note.archived === 0);  // 只看正常
+      }
 
     const limited = result.slice(0, currentLimit);
     renderNotes(limited);

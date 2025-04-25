@@ -3,7 +3,7 @@ import json
 from db import get_db
 from typing import List
 
-def get_all_notes(limit=None, tag=None, category_id=None, userid=None, notebook_id=None):
+def get_all_notes(limit=None, tag=None, category_id=None, userid=None, notebook_id=None, include_archived=False):
     conn = get_db()
     cur = conn.cursor()
 
@@ -15,9 +15,13 @@ def get_all_notes(limit=None, tag=None, category_id=None, userid=None, notebook_
         FROM notes n
         LEFT JOIN categories c ON n.category_id = c.id
         LEFT JOIN notebooks nb ON c.notebook_id = nb.id
-        WHERE n.archived = 0
+        WHERE 1=1
     """
     params = []
+
+    # 只有當 include_archived=False 時，才加上 archived = 0 的條件
+    if not include_archived:
+        query += " AND n.archived = 0"
 
     if category_id:
         query += " AND n.category_id = ?"
