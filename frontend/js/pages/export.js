@@ -1,3 +1,6 @@
+
+import { showToast  } from './utils.js';
+
 let notebookDataMap = {}; // { notebook_id: { categories: [...], tags: [...], users: [...] } }
 
 export async function init() {
@@ -152,7 +155,9 @@ async function executeExport() {
     });
     const data = await res.json();
     if (data.filename) {
-      document.getElementById('exportMessage').textContent = `✅ Exported to file: ${data.filename}`;
+      //document.getElementById('exportMessage').textContent = `✅ Exported to file: ${data.filename}`;
+	  showToast('nb.export', 'add', data.filename); 
+
     } else {
       alert('❌ Export failed');
     }

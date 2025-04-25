@@ -451,7 +451,7 @@ function setupContextMenu() {
     if (res.ok) {
       contextMenu.classList.add('hidden');
       await selectSection(currentCategory);
-      showToast('note.delete', 'delete', currentRightClickNoteId );
+      showToast('note.delete', 'delete', "" );
 
     } else {
       alert('❌ Failed to delete note.');

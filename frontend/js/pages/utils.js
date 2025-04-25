@@ -35,12 +35,13 @@ export function showToast(actionOrMessage, type = 'info', name = '') {
     return pageThemes[selectedTheme] || 'bg-white text-gray-800 border-gray-300';  // 🟢 預設白色
   }
 
-  const typeColors = {
-    info: 'bg-white text-gray-800 border-gray-300',
-    success: 'bg-green-100 text-green-800 border-green-300',
-    error: 'bg-red-100 text-red-800 border-red-300',
-    page: getPageThemeClass()  // 🌸 主題色在這裡！
-  };
+	const typeColors = {
+	  info: getPageThemeClass(),
+	  success: getPageThemeClass(),
+	  error: getPageThemeClass(),
+	  page: getPageThemeClass()
+	};
+
 
   const typeMap = {
     add: 'success',
@@ -108,12 +109,20 @@ export function formatToast(action, type, name) {
       `New note "${name}" created!`
     ],
     'note.delete': [
-      `Note "${name}" deleted.`,
-      `Removed note "${name}".`
+      `Note ${name} deleted.`,
+      `Removed note ${name}.`
     ],
     'note.update': [
       `Note "${name}" saved.`,
       `Updated note "${name}".`
+    ],
+	'nb.export': [
+      `Notebook "${name}" saved.`,
+      `Export Notebook "${name}".`
+    ],
+	'nb.import': [
+      `${name} imported.`,
+      `Imported ${name}.`
     ],
     'page.dashboard': [
       'Dashboard ready to explore!',

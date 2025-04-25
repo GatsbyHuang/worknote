@@ -1,3 +1,4 @@
+import { showToast  } from './utils.js';
 
 export async function init() {
   console.log('📤 Initializing Import Page...');
@@ -82,11 +83,12 @@ export async function init() {
 		if (!res.ok) throw new Error('Server error');
 
 		const result = await res.json();
-
+		showToast('nb.import', 'add', "Notebook"); 
 		alert(`✅ Merge completed:
-	📓 Notebooks: ${result.notebooks_merged || 0}
-	📂 Categories: ${result.categories_merged || 0}
-	📝 Notes: ${result.notes_merged || 0}`);
+				📓 Notebooks: ${result.notebooks_merged || 0}
+				📂 Categories: ${result.categories_merged || 0}
+				📝 Notes: ${result.notes_merged || 0}`);
+	
 	  } catch (err) {
 		alert('❌ Merge failed.');
 		console.error(err);
