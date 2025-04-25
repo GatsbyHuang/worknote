@@ -58,8 +58,28 @@ export async function init() {
     codesample_content_css: 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css',
     setup(editor) {
       editor.on('Change Input Undo Redo', () => { isEdit = true; });
+    },
+    paste_preprocess: function(plugin, args) {
+      const temp = document.createElement('div');
+      temp.innerHTML = args.content;
+
+      // 只移除含有「複製」、「編輯」的那個小 button 區塊
+      temp.querySelectorAll('button').forEach(btn => {
+        const text = btn.innerText || '';
+        if (text.includes('複製') || text.includes('編輯')) {
+          const buttonDiv = btn.closest('div');  // 找最近的 div
+          if (buttonDiv) buttonDiv.remove();     // 只移除 button 的父 div
+        }
+      });
+
+      args.content = temp.innerHTML;
     }
-  });
+
+
+
+
+    });
+
 
   // 4️⃣ 綁定 Tag Input 與欄位變動事件
   const tagInput = document.getElementById('tagInput');
