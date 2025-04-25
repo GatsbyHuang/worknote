@@ -1,5 +1,5 @@
 // notetree.js - for note-browser.html
-import { bindOnce, showDownloadSpinner, hideDownloadSpinner,updateHashParam } from './utils.js';
+import { bindOnce, showDownloadSpinner, hideDownloadSpinner,updateHashParam,showToast  } from './utils.js';
 
 let currentCategory = null;
 let currentNotebookId = null;
@@ -61,6 +61,7 @@ function setupButtonEvents() {
 
 	  if (res.ok) {
 		await loadCategories();
+        showToast('category.add', 'add', name);      // ✨ Category "xxx" created!
 	  } else {
 		alert('❌ Failed to add category');
 	  }
@@ -104,7 +105,8 @@ function setupButtonEvents() {
     sessionStorage.setItem('currentNoteId', newNoteId);
 
     await selectSection(currentCategory);
-
+    showToast('note.add', 'add', 'Untitled');
+    
     const newNoteEl = document.querySelector(`[data-note-id="${newNoteId}"]`);
     if (newNoteEl) {
       setActiveNote(newNoteId);
@@ -449,6 +451,8 @@ function setupContextMenu() {
     if (res.ok) {
       contextMenu.classList.add('hidden');
       await selectSection(currentCategory);
+      showToast('note.delete', 'delete', currentRightClickNoteId );
+
     } else {
       alert('❌ Failed to delete note.');
     }
@@ -477,6 +481,7 @@ function setupContextMenu() {
     if (res.ok) {
       contextMenu.classList.add('hidden');
       await loadCategories();
+      showToast('category.delete', 'delete', currentRightClickCategory); 
     } else {
       alert('❌ Failed to delete category.');
     }

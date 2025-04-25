@@ -1,5 +1,5 @@
 import Fuse from 'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.esm.min.js';
-import { bindOnce,clearSelect } from './utils.js';
+import { bindOnce,clearSelect,showToast  } from './utils.js';
 //import PageState from './pagestate.js';
 
 let isEdit = false; 
@@ -156,7 +156,9 @@ export async function init() {
     });
 
     if (res.ok) {
-      alert('✅ Note saved successfully!');
+      //alert('✅ Note saved successfully!');
+     //showToast('✅ Note saved successfully!', 'success');  // 用 toast
+     showToast('note.add', 'add', title);
       sessionStorage.setItem('currentNoteId', noteId);
       window.location.hash = `#notetree?notebook=${notebookId}&category=${category}`;
       window.dispatchEvent(new Event('popstate'));

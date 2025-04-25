@@ -1,5 +1,5 @@
 // note-drag.js
-import { bindOnce } from './utils.js'; 
+import { bindOnce,showToast  } from './utils.js'; 
 
 export function init() {
   console.log('[🖱️] Drag-and-Drop Initialized');
@@ -47,7 +47,7 @@ export function init() {
 
       li.classList.remove('ring-2', 'ring-blue-400', 'bg-blue-50');
       console.log(`✅ Note ${noteId} moved to category ${newCategoryId}`);
-
+      showToast('✅ Note moved successfully', 'success');
       window?.selectSection?.(newCategoryId);
 
     } catch (err) {
