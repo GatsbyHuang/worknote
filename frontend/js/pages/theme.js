@@ -94,7 +94,7 @@ export function setupIdleCharacter() {
     idleTimer = setTimeout(() => {
       isIdle = true;
       triggerIdleCharacter();  // 開始第一隻
-    }, 60000);  // 10 秒 idle
+    }, 2000);  // 10 秒 idle
   }
 
   ['mousemove', 'keydown', 'click'].forEach(event => {
