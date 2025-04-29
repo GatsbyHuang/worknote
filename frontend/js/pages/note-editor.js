@@ -158,10 +158,11 @@ export async function init() {
     if (res.ok) {
       //alert('✅ Note saved successfully!');
      //showToast('✅ Note saved successfully!', 'success');  // 用 toast
-     showToast('note.add', 'add', title);
+      showToast('note.add', 'add', title);
+	  stopAutoSave();
       sessionStorage.setItem('currentNoteId', noteId);
       window.location.hash = `#notetree?notebook=${notebookId}&category=${category}`;
-      window.dispatchEvent(new Event('popstate'));
+      window.dispatchEvent(new Event('hashchange'));
     } else {
       alert('❌ Failed to save the note.');
     }
@@ -329,7 +330,7 @@ function startAutoSave() {
   if (window.__autoSaveStarted__) return;
   window.__autoSaveStarted__ = true;
 
-  setInterval(async () => {
+  window.__autoSaveTimerId__ = setInterval(async () => {
     if (!isEdit) return;
 
     const userid = localStorage.getItem('userId');
@@ -369,5 +370,14 @@ function startAutoSave() {
   }, 30000);
 }
 
+
+function stopAutoSave() {
+  if (window.__autoSaveTimerId__) {
+    clearInterval(window.__autoSaveTimerId__);
+    window.__autoSaveStarted__ = false;
+    window.__autoSaveTimerId__ = null;
+    console.log('🛑 Auto-save stopped.');
+  }
+}
 
 

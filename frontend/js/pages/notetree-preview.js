@@ -68,6 +68,13 @@ export function renderNoteDetail(note) {
 	
 	bindOnce(document.getElementById('closeEditModalBtn'), 'click', () => {
 	  document.getElementById('noteEditModal')?.classList.add('hidden');
+	    //stop autosave event, or this event will persist even after modal closed.
+	    if (window.__autoSaveTimerId__) {
+			clearInterval(window.__autoSaveTimerId__);
+			window.__autoSaveStarted__ = false;
+			window.__autoSaveTimerId__ = null;
+			console.log('🛑 Auto-save stopped.');
+		  }
 	});
 	
 	bindOnce(document.getElementById('editNoteBtn'), 'click', openEditorModal);
