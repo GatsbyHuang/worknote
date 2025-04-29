@@ -108,6 +108,11 @@ export function formatToast(action, type, name) {
       `Note "${name}" added.`,
       `New note "${name}" created!`
     ],
+	'note.autosaved': [
+	  `Changes to "${name}" saved.`,
+	  `"${name}" has been saved automatically.`,
+	  `Auto-saved your work on "${name}".`
+	],
     'note.delete': [
       `Note ${name} deleted.`,
       `Removed note ${name}.`

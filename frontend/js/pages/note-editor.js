@@ -362,9 +362,11 @@ function startAutoSave() {
     if (res.ok) {
       isEdit = false;
 	  console.log("auto saved.")
-      showAutoSaveMask();
+      //showAutoSaveMask();
+	  showToast('note.autosaved', 'add', title);
+
     }
-  }, 60000);
+  }, 30000);
 }
 
 
