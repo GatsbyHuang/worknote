@@ -27,12 +27,19 @@
   .category-badge {
     background-color: #cbd5e1; /* cool gray */
   }
+  
+  
 
   /* theme 動畫效果 */
 
 #sidebar {
   position: relative;
-  z-index: 20;  /* Sidebar 整體比雪花高 */
+  z-index: 13;  /* Sidebar 整體比雪花高 */
+}
+
+#sidebar.collapsed {
+  padding: 0;
+  overflow: hidden; /* ⭐️重點，防止展開文字溢出 */
 }
 
 
@@ -406,11 +413,13 @@
       // Sidebar toggle setup
       document.getElementById('sidebarToggleBtn')?.addEventListener('click', () => {
         const sidebar = document.getElementById('sidebar');
+		
         sidebar.classList.toggle('w-64');
         sidebar.classList.toggle('w-0');
         sidebar.classList.toggle('p-4');
         sidebar.classList.toggle('overflow-y-auto');
         sidebar.classList.toggle('hidden');
+		sidebar.classList.toggle('collapsed');
       });
 
       // Sidebar active state toggle
