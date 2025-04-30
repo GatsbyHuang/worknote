@@ -367,7 +367,7 @@ function startAutoSave() {
 	  showToast('note.autosaved', 'add', title);
 
     }
-  }, 30000);
+  }, 60000);
 }
 
 
