@@ -2,7 +2,7 @@ import json
 from io import BytesIO
 from weasyprint import HTML
 from db import get_db
-
+from datetime import datetime
 
 def get_common_pdf_styles():
     return '''
@@ -41,7 +41,7 @@ def get_common_pdf_styles():
 
 def generate_note_pdf(note_id):
     conn = get_db()
-    note = conn.execute('SELECT title, content, tags, created_at FROM notes WHERE id = ?', (note_id,)).fetchone()
+    note = conn.execute('SELECT title, content, tags, created_at,userid FROM notes WHERE id = ?', (note_id,)).fetchone()
     conn.close()
 
     if not note:
@@ -49,12 +49,16 @@ def generate_note_pdf(note_id):
 
     title = note['title'] or 'Untitled'
     content = note['content'] or ''
+    userid = note['userid'] or ''
     try:
         tags = ', '.join(json.loads(note['tags'] or '[]'))
     except json.JSONDecodeError:
         tags = ''
     created_at = note['created_at']
-
+    # 移除 'Z' 並解析為 UTC 時間
+    created_at_dt = datetime.strptime(created_at.replace('Z', ''), "%Y-%m-%dT%H:%M:%S.%f")
+    # 格式化為 'yyyy-mm-dd hh:mm:ss'
+    created_at = created_at_dt.strftime("%Y-%m-%d %H:%M:%S")
     # 套用共用 CSS
     css = get_common_pdf_styles()
     html_content = f'''
@@ -65,8 +69,8 @@ def generate_note_pdf(note_id):
     </head>
     <body>
       <h1>{title}</h1>
-      <div class="note-content">{content}</div>
-      <div class="note-meta">Tags: {tags} | Created: {created_at}</div>
+      <div class="note-content">{content} </div>
+      <div class="note-meta">Tags: {tags} | Author: {userid} | Created: {created_at}</div>
     </body>
     </html>
     '''
@@ -94,7 +98,7 @@ def generate_notebook_pdf(notebook_id):
     ''', (notebook_id,)).fetchall()
 
     notes = conn.execute('''
-        SELECT id, title, content, tags, category_id, created_at
+        SELECT id, title, content, tags, category_id, created_at ,userid
         FROM notes
         WHERE category_id IN (SELECT id FROM categories WHERE notebook_id = ?)
          AND archived = 0
@@ -134,10 +138,14 @@ def generate_notebook_pdf(notebook_id):
         html_parts.append(f'<h2>{cat["name"]}</h2>')
         count = 1
         for note in cat_map[cat['id']]['notes']:
+            # 移除 'Z' 並解析為 UTC 時間
+            created_at_dt = datetime.strptime(note["created_at"].replace('Z', ''), "%Y-%m-%dT%H:%M:%S.%f")
+            # 格式化為 'yyyy-mm-dd hh:mm:ss'
+            created_at = created_at_dt.strftime("%Y-%m-%d %H:%M:%S")
             tags = ', '.join(json.loads(note['tags'] or '[]'))
             html_parts.append(f'<div class="note-title">{count}. {note["title"]}</div>')
             html_parts.append(f'<div class="note-content">{note["content"]}</div>')
-            html_parts.append(f'<div class="note-meta">Tags: {tags} | Created: {note["created_at"]}</div>')
+            html_parts.append(f'<div class="note-meta">Tags: {tags} | Author: {note["userid"]} | Created: {created_at}</div>')
             count += 1
 
     html_parts.append('</body></html>')
