@@ -44,7 +44,9 @@ export async function init() {
   await tinymce.init({
     selector: '#editor',
     plugins: 'code codesample link image lists fullscreen table',
-    toolbar: 'undo redo | table | formatselect | bold italic | alignleft aligncenter alignright | outdent indent | forecolor backcolor | bullist numlist | codesample | link image | code | fullscreen',
+    toolbar: 'undo redo | table | formatselect | bold italic | alignleft aligncenter alignright | outdent indent | forecolor backcolor | bullist numlist | codesample | fontsize | code | fullscreen | link image',
+    font_size_input_default_unit: 'pt',
+    fontsize_formats: '8pt 10pt 12pt 14pt 18pt 24pt 36pt',
     height: 500,
     branding: false,
     license_key: 'gpl',
@@ -66,7 +68,7 @@ export async function init() {
       // 只移除含有「複製」、「編輯」的那個小 button 區塊
       temp.querySelectorAll('button').forEach(btn => {
         const text = btn.innerText || '';
-        if (text.includes('複製') || text.includes('編輯')) {
+        if (text.includes('複製') || text.includes('編輯') || text.includes('Copy')) {
           const buttonDiv = btn.closest('div');  // 找最近的 div
           if (buttonDiv) buttonDiv.remove();     // 只移除 button 的父 div
         }

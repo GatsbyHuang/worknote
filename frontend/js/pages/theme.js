@@ -45,7 +45,7 @@ export function applyTheme(theme) {
       newNoteBtn.classList.add('bg-orange-400', 'hover:bg-orange-500');
       if (main) main.classList.add('bg-gradient-to-br', 'from-orange-50', 'to-orange-100');
       if (mobileHeader) mobileHeader.classList.add('bg-orange-100');
-      addSeasonEffect('#season_div','🍂',55);
+      addSeasonEffect('#season_div','🍂',5);
       break;
     case 'winter':
       header.classList.add('bg-gradient-to-r', 'from-blue-200', 'to-blue-100');
