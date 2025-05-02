@@ -47,10 +47,8 @@ export async function init() {
         </li>`;
     }).join('');
 
-    // Recent notes
-    const noteRes = await fetch('/api/notes?limit=10');
-    const notes = await noteRes.json();
-    renderTopCategories(notes);
+
+    renderTopCategories(stats.top_categories,stats.total_notes);
     loadNotebookStats();
 	
 
@@ -77,7 +75,24 @@ function formatRelativeTime(dateStr) {
   return rtf.format(-Math.floor(diffSec / 86400), 'day');
 }
 
-function renderTopCategories(notes) {
+
+function renderTopCategories(top_categories,total_notes) {
+  //const total = top_categories.reduce((sum, item) => sum + item.count, 0);
+  const total = total_notes 
+  const listDiv = document.getElementById('topCategories');
+  listDiv.innerHTML = top_categories.map(({ name, count }) => {
+    const percent = ((count / total) * 100).toFixed(1);
+    const bgColor = getCategoryColor(name);
+    return `
+      <li class="flex justify-between items-center px-3 py-1 rounded shadow-sm" style="background-color:${bgColor}">
+        <span class="font-medium text-gray-800">${name}</span>
+        <span class="text-xs text-gray-600">(${count} / ${percent}%)</span>
+      </li>`;
+  }).join('');
+}
+
+
+function renderTopCategories_old(notes) {
   const counts = {};
   notes.forEach(n => {
     const cat = n.category_name?.trim();

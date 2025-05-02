@@ -125,6 +125,18 @@ def get_dashboard_stats():
 
     # ✅ 總 notebook 數量
     total_notebooks = cur.execute("SELECT COUNT(*) FROM notebooks").fetchone()[0]
+
+    
+    top_categories = cur.execute("""
+        SELECT c.name AS name, COUNT(n.id) AS count
+        FROM notes n
+        JOIN categories c ON n.category_id = c.id
+        WHERE n.archived = 0
+        GROUP BY c.id, c.name
+        ORDER BY count DESC 
+        LIMIT 10
+    """).fetchall()
+    
     conn.close()
     
     return {
@@ -133,5 +145,6 @@ def get_dashboard_stats():
         "unique_tags": len(tag_set),
         "last_updated": last_updated,
         "total_notebooks": total_notebooks,
+        "top_categories": [dict(row) for row in top_categories],
         "top_notebooks": [dict(row) for row in top_notebooks]
     }
