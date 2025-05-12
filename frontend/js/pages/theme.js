@@ -159,7 +159,6 @@ export function initThemeHandler() {
     btn.addEventListener('click', () => {
       const theme = btn.dataset.theme;
       localStorage.setItem('selectedTheme', theme);
-      sessionStorage.setItem('selectedTheme', theme);
       applyTheme(theme);
       initUserHandler();
       modal.classList.add('hidden');
