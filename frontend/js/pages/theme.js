@@ -94,7 +94,7 @@ export function setupIdleCharacter() {
     idleTimer = setTimeout(() => {
       isIdle = true;
       triggerIdleCharacter();  // 開始第一隻
-    }, 30000);  // 30 秒 idle
+    }, 5000);  // 30 秒 idle
   }
 
   ['mousemove', 'keydown', 'click'].forEach(event => {
@@ -108,7 +108,7 @@ export function triggerIdleCharacter() {
   if (!isIdle) return;  // ❌ 如果不是 idle，不要出現動物
 
   const character = document.getElementById('seasonCharacter');
-  const theme = sessionStorage.getItem('selectedTheme') || 'default';
+  const theme = localStorage.getItem('selectedTheme') || 'default';
   const themeCharacters = {
     spring: ['🐇', '🐿️', '🦆', '🐤', '🐝'],
     summer: ['🦎', '🐢', '🐓', '🦩', '🦀'],
